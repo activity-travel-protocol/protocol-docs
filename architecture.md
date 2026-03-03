@@ -8,6 +8,37 @@
 
 ---
 
+## Introduction
+
+The global travel industry moves hundreds of millions of people across the world every
+year. When it works, it is invisible — guests arrive, activities happen, experiences are
+created. When it breaks down, the consequences fall entirely on travelers, who are left
+stranded, uninformed, and unprotected, often in unfamiliar countries far from home.
+
+The Activity and Travel Orchestration Protocol (ATOP) exists because the industry's
+current digital infrastructure was not built for the world we live in. Existing protocols
+handle the transaction — the booking, the confirmation, the payment. They do not handle
+the experience. They were not designed for the complexity of multi-supplier activity
+packages assembled in real time. They were not designed for AI agents acting on behalf
+of travelers. And critically, they were not designed for disruption — the moments when
+an airspace closes, a natural disaster strikes, or a geopolitical crisis puts thousands
+of travelers in harm's way simultaneously.
+
+Consumer protection is the foundational purpose of ATOP. Every design decision — the
+Trust Chain, the Jurisdiction Compliance Registry, the Disruption Event framework, the
+Duty of Care workflow — exists to ensure that when something goes wrong, the traveler is
+not alone. The right party is notified. The right information flows. The right protections
+are activated. This is what a modern travel protocol must do, and what no current standard
+does adequately.
+
+ATOP is open source, Apache 2.0 licensed, and designed to be adopted by any party in
+the global travel industry — hotels, tour operators, airlines, OTAs, government bodies,
+and AI platforms — without commercial lock-in or proprietary dependency. It is built to
+become the infrastructure layer that makes coordinated, consumer-protective travel
+commerce possible at global scale.
+
+---
+
 ## Table of Contents
 
 1. [Purpose of This Document](#1-purpose-of-this-document)
@@ -19,10 +50,11 @@
 7. [The Feasibility Check Operation](#7-the-feasibility-check-operation)
 8. [Communication and Security Architecture](#8-communication-and-security-architecture)
 9. [Party Policy Declarations](#9-party-policy-declarations)
-10. [Versioning and Compatibility](#10-versioning-and-compatibility)
-11. [Scope Boundaries](#11-scope-boundaries)
-12. [Relationship to Existing Standards](#12-relationship-to-existing-standards)
-13. [Implementation Conformance](#13-implementation-conformance)
+10. [Disruption Events and Consumer Protection](#10-disruption-events-and-consumer-protection)
+11. [Versioning and Compatibility](#11-versioning-and-compatibility)
+12. [Scope Boundaries](#12-scope-boundaries)
+13. [Relationship to Existing Standards](#13-relationship-to-existing-standards)
+14. [Implementation Conformance](#14-implementation-conformance)
 
 ---
 
@@ -952,7 +984,152 @@ surfaces them early when resolution is least costly.
 
 ---
 
-## 10. Versioning and Compatibility
+## 10. Disruption Events and Consumer Protection
+
+### 10.1 The Problem No Existing Protocol Solves
+
+When a major disruption occurs — an airspace closure, a natural disaster, a pandemic, a
+geopolitical crisis — thousands of active travel bookings are simultaneously affected
+across dozens of suppliers, operators, and jurisdictions. In the current state of the
+industry, the response is largely manual: phone calls between tour operators and hotels,
+WhatsApp chains between guides and drivers, travel agents calling airlines one by one,
+government advisories published as PDFs that no booking system can read automatically.
+
+Travelers in the middle of their journey — on the ground in an affected region, in
+transit through a closing airspace, or hours away from departure — have no reliable
+channel through which the parties responsible for their safety can coordinate in real
+time. No existing travel protocol — NDC, GDS, OpenTravel — provides a machine-readable
+mechanism for declaring a region-wide disruption, propagating it to affected bookings,
+activating duty of care obligations, or coordinating the response across the multi-party
+chains that modern travel involves.
+
+ATOP addresses this gap directly. Disruption Event handling is a first-class feature of
+the protocol, not an afterthought.
+
+### 10.2 The Disruption Event Declaration
+
+A **Disruption Event Declaration** is a protocol-level object that can be issued by an
+authorized party to declare that a named region, route, or travel corridor is under a
+disruption condition.
+
+**Authorized issuers** (declared in the Party Registry with the Regulatory role):
+- National tourism agencies and government bodies (e.g. Japan Tourism Agency, MOFA)
+- International aviation authorities (IATA, ICAO, EASA)
+- Protocol Operators
+- Major carriers and transport operators for disruptions within their operational scope
+
+**Declaration fields:**
+- Unique declaration identifier
+- Issuing authority (Party identifier from the Registry)
+- Affected region (geographic boundary — countries, FIRs, specific routes, or named
+  corridors)
+- Disruption type: `AIRSPACE_CLOSURE`, `CIVIL_UNREST`, `NATURAL_DISASTER`,
+  `PANDEMIC`, `INFRASTRUCTURE_FAILURE`, `SAFETY_ADVISORY`, or `OTHER`
+- Severity level: `MONITOR`, `CAUTION`, `WARNING`, `CRITICAL`
+- Valid from / valid until timestamps
+- Advisory text (machine-readable structured data + human-readable summary)
+- Reference to authoritative external source (government advisory URL, NOTAM reference,
+  EASA CZIB number)
+- Affected booking scope: which in-flight bookings are in scope (by destination region,
+  transit region, or origin region)
+- Recommended actions (structured list of protocol-level actions — not policy decisions)
+
+### 10.3 Propagation and Booking State
+
+When a Disruption Event Declaration is issued and matches one or more active bookings,
+those bookings automatically transition to a **DISRUPTION-REVIEW** state. This state:
+
+- Notifies all parties in the affected booking's Trust Chain
+- Suspends any pending automated actions (AI agent negotiations, automated confirmations)
+  until a human Actor reviews the situation
+- Activates the Duty of Care obligation for the party declared as primary responsible
+  party in the Trust Chain
+- Records the Declaration reference in the booking's audit history
+- Does not automatically cancel, rebook, or modify the booking — those are decisions for
+  the responsible parties, not the protocol
+
+The DISRUPTION-REVIEW state has a defined timeout: if the primary responsible party does
+not acknowledge within the declared window, the protocol escalates the notification to
+the next party in the Trust Chain and records the non-response.
+
+### 10.4 Duty of Care as a Protocol Obligation
+
+Every ATOP Trust Chain includes a **Duty of Care Declaration** — an explicit statement
+of which party holds primary duty of care responsibility for the traveler at each phase
+of the journey. This is not an assumption or a default — it is a declared, signed
+commitment that travels with the booking from the moment of CONFIRMATION.
+
+When a disruption occurs, the protocol knows immediately:
+- Who is responsible for the traveler right now
+- How to reach them (communication channels from their Party Policy Declaration)
+- What their obligation is (defined by the jurisdiction compliance configuration)
+- What the escalation path is if they do not respond
+
+This is the mechanism that transforms a government travel advisory from a PDF on a
+website into a machine-readable signal that reaches the right party, for the right
+booking, in real time.
+
+### 10.5 Government Advisory Integration
+
+Government travel advisories are registered in the Resource Reference Registry as a
+dedicated resource category: **Travel Safety Advisories**.
+
+Registered advisory sources include:
+- Japan Tourism Agency (JTA) overseas safety information
+- Japan Ministry of Foreign Affairs (MOFA) Overseas Safety Information
+- EASA Conflict Zone Information Bulletins (CZIBs)
+- US State Department Travel Advisories
+- UK Foreign Commonwealth and Development Office (FCDO) Travel Advice
+- IATA Safety Advisories
+
+When an advisory for a registered region changes severity level, implementing systems
+can subscribe to receive the change as a protocol event. This event can be configured
+to automatically trigger a Disruption Event Declaration review, or to notify Party
+Actors for manual assessment, depending on the implementing system's configuration.
+
+The protocol does not interpret advisories or make safety decisions. It provides the
+infrastructure for advisory data to flow into the booking systems that need it, and for
+the right parties to be notified when the risk level for their travelers' destinations
+changes.
+
+### 10.6 New Booking Restrictions Under Disruption
+
+A party may declare a **Disruption Booking Restriction** — a policy applied to new
+bookings (not existing ones) for a specified region during an active Disruption Event.
+
+Restriction types include:
+- `SUSPENDED`: no new bookings accepted for this region
+- `ADVISORY_REQUIRED`: booking may proceed only after customer acknowledges the active
+  advisory and confirms intent to travel
+- `INSURANCE_REQUIRED`: booking may proceed only if the customer declares valid travel
+  insurance covering the disruption type
+- `MANUAL_REVIEW`: new bookings for this region require human Actor review before
+  CONFIRMATION
+
+These restrictions are machine-readable. AI agents and booking systems must check for
+active Disruption Booking Restrictions before entering the CONFIGURATION state for any
+itinerary that includes an affected region.
+
+### 10.7 Consumer Protection as the Design Principle
+
+Disruption Event handling is not a feature added for edge cases. It reflects the
+foundational principle that **consumer protection is the primary purpose of ATOP**.
+
+The traveler is the most vulnerable party in any travel transaction. They have the least
+information, the least leverage, and the most at risk when something goes wrong. Every
+layer of the protocol — the Trust Chain that establishes accountability, the Jurisdiction
+Compliance Registry that enforces legal protections, the Duty of Care Declaration that
+names responsibility, and the Disruption Event framework that activates when the world
+changes — exists to ensure that the traveler is protected, informed, and reachable,
+regardless of what happens.
+
+ATOP's goal is not merely to make travel commerce more efficient. It is to make travel
+commerce more trustworthy — for travelers, for suppliers, and for the governments and
+regulatory bodies that are responsible for ensuring that trust is upheld.
+
+---
+
+## 11. Versioning and Compatibility
 
 ATOP uses semantic versioning: MAJOR.MINOR.PATCH.
 
@@ -982,7 +1159,7 @@ updates that modify or deprecate existing entries require a MINOR version increm
 
 ---
 
-## 11. Scope Boundaries
+## 12. Scope Boundaries
 
 ### 11.1 What ATOP V1.0 Covers
 
@@ -1019,7 +1196,7 @@ updates that modify or deprecate existing entries require a MINOR version increm
 
 ---
 
-## 12. Relationship to Existing Standards
+## 13. Relationship to Existing Standards
 
 | Standard | Relationship to ATOP |
 |---|---|
@@ -1038,7 +1215,7 @@ updates that modify or deprecate existing entries require a MINOR version increm
 
 ---
 
-## 13. Implementation Conformance
+## 14. Implementation Conformance
 
 A conforming ATOP implementation must:
 
