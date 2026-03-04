@@ -11,5 +11,6 @@
 * [Jurisdiction Entries](jurisdiction-entries.md)
 * [Global Jurisdiction Comparison](jurisdiction-discussion-paper.md)
 * [Trust Chain Declaration Specification](trust-chain.md)
+* [Party Policy Declarations Specification](party-policy-declarations.md)
 * [References](references.md)
 * 
