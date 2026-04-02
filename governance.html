@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Governance — Activity Travel Protocol Foundation</title>
+  <meta name="description" content="The Activity Travel Protocol is governed by the Activity Travel Protocol Foundation, an independent standards body." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0f1a14;
+      --ink-mid:   #2e4038;
+      --ink-light: #5a7266;
+      --ink-faint: #94aaa0;
+      --paper:     #f5f2eb;
+      --paper-dark:#ede9e0;
+      --accent:    #1e6b45;
+      --accent-light: #2e8f5c;
+      --rule:      #d4cfc4;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans:  'DM Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 60px;
+    }
+    .nav-brand {
+      font-family: var(--serif);
+      font-size: 15px;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-light);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.nav-active { color: var(--accent); }
+    .nav-links a.nav-subscribe {
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      padding: 4px 12px;
+      font-size: 12px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-links a.nav-subscribe:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 40px 100px;
+    }
+
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .page h1 {
+      font-family: var(--serif);
+      font-size: clamp(36px, 5vw, 54px);
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-intro {
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--ink-mid);
+      max-width: 580px;
+      margin-bottom: 64px;
+      line-height: 1.65;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 48px;
+    }
+
+    /* ── SECTIONS ── */
+    .gov-section {
+      margin-bottom: 56px;
+    }
+
+    .gov-section h2 {
+      font-family: var(--serif);
+      font-size: 24px;
+      color: var(--ink);
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .gov-section p {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--ink-mid);
+      line-height: 1.8;
+      max-width: 620px;
+      margin-bottom: 16px;
+    }
+
+    .gov-section p strong {
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .gov-section p:last-child { margin-bottom: 0; }
+
+    /* ── SEPARATION CALLOUT ── */
+    .separation-box {
+      border-left: 3px solid var(--accent);
+      padding: 20px 24px;
+      background: var(--paper-dark);
+      margin: 28px 0;
+      max-width: 620px;
+    }
+    .separation-box p {
+      font-size: 15px;
+      color: var(--ink-mid);
+      line-height: 1.75;
+      margin: 0;
+    }
+    .separation-box p strong {
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* ── MEMBERS TABLE ── */
+    .members-list {
+      list-style: none;
+      margin-top: 16px;
+      max-width: 500px;
+    }
+    .members-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--rule);
+      font-size: 15px;
+      color: var(--ink-mid);
+    }
+    .members-list li:last-child { border-bottom: none; }
+    .member-name {
+      font-weight: 500;
+      color: var(--ink);
+      min-width: 160px;
+    }
+    .member-tag {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      padding: 2px 7px;
+    }
+
+    /* ── CTA ── */
+    .gov-cta {
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--rule);
+    }
+    .gov-cta p {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--ink-mid);
+      max-width: 540px;
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+    .cta-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 3px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--accent-light); }
+    .btn-secondary {
+      display: inline-block;
+      border: 1px solid var(--rule);
+      color: var(--ink-mid);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 3px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 40px;
+      font-size: 13px;
+      color: var(--ink-faint);
+    }
+    .footer-left a, .footer-right a {
+      color: var(--ink-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-left a:hover, .footer-right a:hover { color: var(--accent); }
+    .footer-right {
+      display: flex;
+      gap: 24px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 24px; }
+      .nav-links { gap: 20px; }
+      .page { padding: 56px 24px 72px; }
+      footer { padding: 24px; flex-direction: column; align-items: flex-start; gap: 16px; }
+      .footer-right { flex-wrap: wrap; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="/">Activity Travel Protocol</a>
+    <ul class="nav-links">
+      <li><a href="https://activitytravel.pro">Specification</a></li>
+      <li><a href="https://github.com/activity-travel-protocol/protocol-spec">GitHub</a></li>
+      <li><a href="/#contact">Contact</a></li>
+      <li><a href="governance.html" class="nav-active">Governance</a></li>
+    </ul>
+  </nav>
+
+  <main class="page">
+
+    <p class="page-eyebrow">Foundation &amp; Governance</p>
+    <h1>Activity Travel Protocol Foundation</h1>
+    <p class="page-intro">The Activity Travel Protocol is governed by an independent standards body. No single commercial entity owns or controls the protocol.</p>
+
+    <!-- THE FOUNDATION -->
+    <div class="gov-section">
+      <h2>The Foundation</h2>
+      <p>The Activity Travel Protocol Foundation is the independent standards body that governs the Activity Travel Protocol. The Foundation holds authority over the protocol specification (Layers 1–4), the SDK and conformance test suite, and the associated web properties and GitHub organisation.</p>
+      <p>Formal incorporation as a Japanese non-profit legal entity (<strong>一般社団法人アクティビティトラベルプロトコールファウンデーション</strong>) is in progress. The Foundation Charter is the operative governance document in the interim.</p>
+    </div>
+
+    <!-- FOUNDING STORY -->
+    <div class="gov-section">
+      <h2>Founding story</h2>
+      <p>The Activity Travel Protocol was created by <strong>Tom Sato</strong>, CEO of MyAuberge K.K., Chino, Nagano, Japan — a former Microsoft Windows and SDK engineer who recognised that the global travel industry was missing the protocol layer it needed for the age of agentic AI.</p>
+      <p>MyAuberge K.K. is the Founding Member of the Foundation and the primary contributor to Version 1.0. MyAuberge K.K. operates commercial services on top of the protocol. It does not own or control the protocol itself.</p>
+      <div class="separation-box">
+        <p>This is the <strong>Red Hat model</strong> applied to travel infrastructure: the protocol is free and Foundation-governed; commercial operators — including MyAuberge — compete on the quality of their implementations and managed services, not on control of the standard. The Foundation was established precisely to make that separation structural and permanent.</p>
+      </div>
+    </div>
+
+    <!-- TECHNICAL STEERING -->
+    <div class="gov-section">
+      <h2>Technical Steering Committee</h2>
+      <p>The Technical Steering Committee (TSC) is responsible for protocol specification decisions — amendments, versioning, and the roadmap. The TSC Charter defines membership criteria, voting model, and the amendment process.</p>
+      <p><strong>Current TSC composition:</strong> Tom Sato (Founding Maintainer). The structure is designed to accommodate additional members as the Foundation grows.</p>
+    </div>
+
+    <!-- MEMBERSHIP -->
+    <div class="gov-section">
+      <h2>Founding Members</h2>
+      <p>The Foundation welcomes Founding Members — organisations that commit to implementing the Activity Travel Protocol and participating in its development.</p>
+      <ul class="members-list">
+        <li>
+          <span class="member-name">MyAuberge K.K.</span>
+          <span class="member-tag">Founding Member</span>
+        </li>
+        <li>
+          <span class="member-name">Further members</span>
+          <span style="color: var(--ink-faint); font-size: 14px;">Outreach in progress</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CONTRIBUTING -->
+    <div class="gov-section">
+      <h2>Contributing</h2>
+      <p>All proposed changes to the specification are submitted as GitHub pull requests with a written rationale. The TSC reviews and merges accepted changes.</p>
+      <p>By submitting a contribution, contributors agree to the <a href="https://github.com/activity-travel-protocol/protocol-spec/blob/main/CLA.md" style="color: var(--accent);">Contributor Licence Agreement (CLA)</a>, which assigns copyright to the Foundation under Apache 2.0 and prevents any single party from relicensing the work.</p>
+    </div>
+
+    <!-- CTA -->
+    <div class="gov-cta">
+      <p>To propose a change to the specification, or to enquire about Foundation membership, open an Issue on the protocol-spec repository.</p>
+      <div class="cta-links">
+        <a class="btn-primary" href="https://github.com/activity-travel-protocol/protocol-spec/issues">Open an Issue on GitHub</a>
+        <a class="btn-secondary" href="https://activitytravel.pro/spec/CHARTER">Read the Charter</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-left">
+      Apache 2.0 &nbsp;·&nbsp;
+      <a href="/governance.html">Activity Travel Protocol Foundation</a> &nbsp;·&nbsp;
+      <a href="https://activitytravel.pro">activitytravel.pro</a>
+    </div>
+    <div class="footer-right">
+      <a href="/">Home</a>
+      <a href="https://activitytravel.pro">Specification</a>
+      <a href="https://github.com/activity-travel-protocol/protocol-spec">GitHub</a>
+      <a href="/#contact">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>

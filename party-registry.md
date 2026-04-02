@@ -1,9 +1,9 @@
-# ATOP Party Registry Specification
+# Activity Travel Protocol Party Registry Specification
 
 **Version:** 0.2 (Draft)  
 **Status:** Layer 1 — Identity and Trust  
 **Date:** March 2026  
-**Repository:** atop-protocol/atop-spec  
+**Repository:** Activity Travel Protocol-protocol/Activity Travel Protocol-spec  
 **Depends on:** Architecture Specification v0.1  
 **License:** Apache 2.0  
 
@@ -32,8 +32,8 @@
 
 ## 1. Purpose of This Document
 
-The Party Registry is the foundational component of ATOP Layer 1 — Identity and Trust.
-Every entity that participates in an ATOP transaction must be registered. The Registry
+The Party Registry is the foundational component of Activity Travel Protocol Layer 1 — Identity and Trust.
+Every entity that participates in an Activity Travel Protocol transaction must be registered. The Registry
 is the source of truth for who parties are, what roles they hold, what credentials they
 possess, and who is authorized to act on their behalf.
 
@@ -49,7 +49,7 @@ This specification defines:
 - How Trust Chains are constructed from Registry data at transaction time
 - The Registry API operations
 
-This document is written for implementors. A developer with no prior ATOP knowledge
+This document is written for implementors. A developer with no prior Activity Travel Protocol knowledge
 should be able to implement a conforming Party Registry after reading this document and
 the Architecture Specification.
 
@@ -57,26 +57,26 @@ the Architecture Specification.
 
 ## 2. Foundational Framework
 
-Before defining what a Party record contains, this section establishes *how* ATOP
+Before defining what a Party record contains, this section establishes *how* Activity Travel Protocol
 describes entities, roles, and credentials. Every major component of the Registry
 follows the same underlying patterns.
 
 ### 2.1 The Claim Model
 
-Every piece of information in the ATOP Registry is a **claim** — a statement made by
+Every piece of information in the Activity Travel Protocol Registry is a **claim** — a statement made by
 some party about some subject.
 
 A claim has three components:
 
 | Component | Question | Example |
 |---|---|---|
-| **Subject** | Who or what is being described? | MyAuberge Co., Ltd. |
+| **Subject** | Who or what is being described? | MyAuberge K.K. |
 | **Claim** | What is being asserted? | Holds a valid hotel operating license |
 | **Claimant** | Who is making the assertion? | Nagano Prefecture Tourism Department |
 
-This model is adopted from W3C Verifiable Credentials (VC) Data Model 2.0, which ATOP
+This model is adopted from W3C Verifiable Credentials (VC) Data Model 2.0, which Activity Travel Protocol
 uses as its formal standard for machine-readable credential claims. Not every claim in
-ATOP reaches the full W3C VC format, but all claims follow this three-part structure.
+Activity Travel Protocol reaches the full W3C VC format, but all claims follow this three-part structure.
 
 **Self-declared claims** are made by the Party about itself — a hotel declaring its
 own name and address. These are the lowest-assurance claims. They are useful for
@@ -92,7 +92,7 @@ MUST NOT treat a self-declared claim as equivalent to a verified claim.
 
 ### 2.2 The Verification Model
 
-Verification is the process by which a claim is assessed for reliability. ATOP defines
+Verification is the process by which a claim is assessed for reliability. Activity Travel Protocol defines
 four verification methods, corresponding to four Assurance Levels.
 
 | Level | Name | Verification Method | Standard Reference |
@@ -107,14 +107,14 @@ required for each credential type in each jurisdiction.
 
 ### 2.3 Data Formats in the Real World
 
-ATOP implementations encounter credentials and identity data in many formats. This
-section describes the formats ATOP recognizes and how each maps to the claim and
+Activity Travel Protocol implementations encounter credentials and identity data in many formats. This
+section describes the formats Activity Travel Protocol recognizes and how each maps to the claim and
 verification model.
 
 **Paper documents** — the most common format for regulatory credentials today.
 Examples: hotel operating license, taxi driver license, food handler certificate.
 
-*How ATOP handles it:* The Party uploads a scan. An authorized reviewer examines it
+*How Activity Travel Protocol handles it:* The Party uploads a scan. An authorized reviewer examines it
 and records: document type, issuing authority, license number, issue date, expiry date,
 and a SHA-256 hash of the uploaded image. The reviewer signs the attestation using
 their Actor credential. The Registry stores only the hash and reference URL, not the
@@ -123,7 +123,7 @@ document itself. Assurance Level: 2.
 **Structured digital documents (signed PDF)** — a digitally issued certificate in PDF
 form may carry an embedded digital signature from the issuing authority.
 
-*How ATOP handles it:* Same as paper, with additional signature verification. Where
+*How Activity Travel Protocol handles it:* Same as paper, with additional signature verification. Where
 the PDF carries a valid digital signature from a recognized authority, this may qualify
 for Assurance Level 3. Assurance Level: 2 (unsigned) or 3 (authority-signed).
 
@@ -131,7 +131,7 @@ for Assurance Level 3. Assurance Level: 2 (unsigned) or 3 (authority-signed).
 company and license registries via API. Japan's houjin bangou (corporate number)
 system, UK Companies House API, EU business registries.
 
-*How ATOP handles it:* The Party submits its registration number. The Protocol Operator
+*How Activity Travel Protocol handles it:* The Party submits its registration number. The Protocol Operator
 queries the jurisdiction API, verifies the registration number matches the declared
 legal name and status, and records the query response with timestamp.
 Assurance Level: 3.
@@ -143,7 +143,7 @@ of recognized government API sources per jurisdiction.
 issued as a W3C VC contains the claim, the issuer cryptographic signature, and a
 reference to the issuer DID document for public key lookup.
 
-*How ATOP handles it:* The Party presents the VC. ATOP resolves the issuer DID to
+*How Activity Travel Protocol handles it:* The Party presents the VC. Activity Travel Protocol resolves the issuer DID to
 obtain the public key. The VC signature is verified cryptographically. The VC is stored
 in full and re-verified at each transaction. Assurance Level: 4.
 
@@ -153,15 +153,15 @@ in full and re-verified at each transaction. Assurance Level: 4.
 **Graph-structured data (JSON-LD, RDF)** — some credential ecosystems represent
 interconnected claims as a graph. JSON-LD is also the serialization format for W3C VCs.
 
-*How ATOP handles it:* JSON-LD is natively supported as the serialization for W3C VCs.
-RDF triples may be submitted as supporting evidence. ATOP processes graph data at
+*How Activity Travel Protocol handles it:* JSON-LD is natively supported as the serialization for W3C VCs.
+RDF triples may be submitted as supporting evidence. Activity Travel Protocol processes graph data at
 ingestion and stores as structured credential references. Assurance Level: determined
 by the verification method of the root claim.
 
 **Self-asserted structured data (JSON)** — for information where no external credential
 exists: contact details, website, supported protocol versions.
 
-*How ATOP handles it:* Accepted and stored as-is, marked `self_declared: true`.
+*How Activity Travel Protocol handles it:* Accepted and stored as-is, marked `self_declared: true`.
 No verification performed. Assurance Level: 1.
 
 ### 2.4 The Description Schema Pattern
@@ -175,7 +175,7 @@ field names, types, required fields, and constraints. This is the normative defi
 **Part 2 — Field definitions.** A table defining every field: its purpose, whether
 required or optional, who provides it, and whether publicly readable or authenticated.
 
-**Part 3 — Example.** A complete, realistic JSON example using MyAuberge Co., Ltd.
+**Part 3 — Example.** A complete, realistic JSON example using MyAuberge K.K.
 as the reference party throughout this document.
 
 When extending the specification with new entity types, the same three-part pattern
@@ -187,14 +187,14 @@ This specification uses RFC 2119 key words: MUST, MUST NOT, REQUIRED, SHALL, SHO
 RECOMMENDED, MAY, OPTIONAL.
 
 **Schema language.** All schemas are expressed in JSON Schema 2020-12. Normative schema
-files are maintained in `atop-protocol/atop-spec` under `/schemas/registry/`. Inline
+files are maintained in `Activity Travel Protocol-protocol/Activity Travel Protocol-spec` under `/schemas/registry/`. Inline
 schemas in this document are illustrative. Repository schemas are authoritative.
 
 ---
 
 ## 3. Party — The Top-Level Entity
 
-A **Party** is the top-level entity in the ATOP Registry. Everything else is either a
+A **Party** is the top-level entity in the Activity Travel Protocol Registry. Everything else is either a
 property of a Party or a relationship between Parties.
 
 ### What a Party Record Describes
@@ -208,7 +208,7 @@ A Party record answers six questions:
 | **Actors** | Who and what can act on behalf of this entity? | Section 6 |
 | **Credentials** | What qualifications does this entity hold? | Section 8 |
 | **Compliance** | Is this entity compliant where it operates? | Section 9 |
-| **Protocol Support** | What ATOP version does this entity support? | Section 10 |
+| **Protocol Support** | What Activity Travel Protocol version does this entity support? | Section 10 |
 
 These components are not independent. Roles depend on Credentials. Compliance depends
 on Roles and Credentials. Actors derive authority from the Party record. The Party
@@ -267,7 +267,7 @@ require Credentials.
 
 However, identity verification is a prerequisite for registration. A Party MUST have
 its core identity claims verified at Assurance Level 2 or above before holding active
-Roles. This ensures every participant in the ATOP ecosystem is a real, identifiable
+Roles. This ensures every participant in the Activity Travel Protocol ecosystem is a real, identifiable
 entity.
 
 ### 4.2 Identity Claims and Their Verification
@@ -320,7 +320,7 @@ Identity data describes entities, not individuals in a personal capacity. For
 present. These fields are not publicly readable without authentication and justified
 transaction context.
 
-ATOP implementations MUST comply with applicable data protection law for each
+Activity Travel Protocol implementations MUST comply with applicable data protection law for each
 jurisdiction of operation — including Japan APPI, EU GDPR, and equivalent frameworks.
 
 ---
@@ -343,7 +343,7 @@ and consistent extension.
 | `display_name` | string | Human-readable name |
 | `description` | string | What this role represents and who typically holds it |
 | `credential_requirements` | array | Required credential types, minimum assurance level, jurisdictions |
-| `transaction_permissions` | array | What this role permits in ATOP workflow states |
+| `transaction_permissions` | array | What this role permits in Activity Travel Protocol workflow states |
 | `regulatory_notes` | string | Optional — jurisdiction-specific compliance constraints |
 | `extensibility` | object | How requirements and permissions are extended over time |
 
@@ -352,7 +352,7 @@ and consistent extension.
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.atop-protocol.org/registry/role-definition/v0.2",
+  "$id": "https://schemas.Activity Travel Protocol-protocol.org/registry/role-definition/v0.2",
   "type": "object",
   "required": ["role_id", "role_version", "category", "display_name",
                "description", "credential_requirements", "transaction_permissions"],
@@ -412,7 +412,7 @@ When a new jurisdiction requires a credential type not yet in a role definition,
 added as a new entry in `credential_requirements` with a `jurisdictions` filter. This
 is a MINOR version change and does not break existing implementations.
 
-When a new workflow state is added to the ATOP protocol, `transaction_permissions` for
+When a new workflow state is added to the Activity Travel Protocol protocol, `transaction_permissions` for
 affected roles are updated additively. Implementations not yet supporting the new state
 continue operating correctly — permissions are additive and the new state simply does
 not appear in their permitted state list.
@@ -459,7 +459,7 @@ new credential have the affected role flagged `credential_pending` until acquire
     {
       "permission_id": "PUBLISH_CAPABILITY_DECLARATION",
       "description": "Publish a Capability Declaration including configuration schemas.",
-      "workflow_states": ["DISCOVERY"]
+      "workflow_states": ["INQUIRY"]
     },
     {
       "permission_id": "RESPOND_TO_INQUIRY",
@@ -479,14 +479,14 @@ new credential have the affected role flagged `credential_pending` until acquire
     {
       "permission_id": "REQUEST_PRE_ACTIVITY_INFO",
       "description": "Issue Pre-Activity Information Requests for gear, waivers,
-        dietary restrictions.",
-      "workflow_states": ["PRE_ACTIVITY_COLLECTION"]
+        dietary restrictions during IN_JOURNEY phases.",
+      "workflow_states": ["IN_JOURNEY"]
     },
     {
-      "permission_id": "TRIGGER_INCIDENT",
-      "description": "Trigger INCIDENT state for activities under operational
-        responsibility.",
-      "workflow_states": ["FULFILLMENT"]
+      "permission_id": "DECLARE_DISRUPTION_EVENT",
+      "description": "Declare a Disruption Event for activities under operational
+        responsibility, triggering DISRUPTION_REVIEW.",
+      "workflow_states": ["IN_JOURNEY"]
     }
   ],
   "regulatory_notes": "Outdoor activity operators in Japan may be subject to the
@@ -507,7 +507,7 @@ new credential have the affected role flagged `credential_pending` until acquire
 
 The canonical role list follows. Each role is described using the fields defined in
 Section 5.1. Machine-readable role definitions are maintained at
-`atop-protocol/atop-spec/schemas/registry/roles/`.
+`Activity Travel Protocol-protocol/Activity Travel Protocol-spec/schemas/registry/roles/`.
 
 ---
 
@@ -528,7 +528,7 @@ Provides bookable activities, experiences, or tours.
 conditional), ACTIVITY_SAFETY_CERT (L2, conditional for outdoor/adventure),
 LIABILITY_INSURANCE (L2, required).  
 *Permissions:* Full activity booking lifecycle. Issue Pre-Activity Collection requests.
-Trigger INCIDENT state.  
+Declare Disruption Events, triggering `DISRUPTION_REVIEW`.  
 *Regulatory notes:* Ski resorts subject to municipal slope safety regulations in Japan.
 
 ---
@@ -537,8 +537,8 @@ Trigger INCIDENT state.
 Provides ground transportation — taxi, van, bus, shuttle.  
 *Credentials required:* TRANSPORT_OPERATOR_LICENSE (L2, required),
 VEHICLE_INSURANCE (L2, required), DRIVER_LICENSE (L2, required for individuals).  
-*Permissions:* Accept transport bookings. Send pickup confirmations. Trigger transport
-INCIDENT state.  
+*Permissions:* Accept transport bookings. Send pickup confirmations. Declare transport
+Disruption Events, triggering `DISRUPTION_REVIEW`.  
 *Regulatory notes:* Capability declarations MUST declare driver availability windows.
 Feasibility checks MUST validate against declared driver hour limits.
 
@@ -664,7 +664,7 @@ agreement.
 #### Platform Roles
 
 **`PROTOCOL_OPERATOR`** · platform · v1.0  
-Operates ATOP-conformant registry and API infrastructure. Responsible for Party
+Operates Activity Travel Protocol-conformant registry and API infrastructure. Responsible for Party
 registration verification, credential attestation, and Trust Chain archival.  
 *Credentials required:* ATOP_OPERATOR_CERT (L3), SECURITY_AUDIT_CERT (L3),
 DATA_PROTECTION_COMPLIANCE (L3).  
@@ -676,7 +676,7 @@ Provides technology services — PMS vendors, booking engines, AI platforms.
 Appears in Trust Chain for audit. Does not hold commercial liability.
 
 **`CERTIFICATION_BODY`** · platform · v1.0  
-Authorized to issue ATOP Conformance Certificates.
+Authorized to issue Activity Travel Protocol Conformance Certificates.
 
 ---
 
@@ -685,8 +685,7 @@ Authorized to issue ATOP Conformance Certificates.
 **`LICENSING_AUTHORITY`** · regulatory · v1.0  
 Government body authorized to issue travel industry licenses.  
 *Special permissions:* May update credential verification status for licenses it has
-issued. Notified when parties under its jurisdiction enter INCIDENT or
-DISRUPTION-REVIEW state.
+issued. Notified when parties under its jurisdiction enter `DISRUPTION_REVIEW` state.
 
 **`CONSUMER_PROTECTION_BODY`** · regulatory · v1.0  
 Government or authorized organization responsible for consumer protection in travel.
@@ -699,9 +698,9 @@ Event Declarations within their operational scope.
 **`EMERGENCY_COORDINATOR`** · regulatory · v1.0  
 Emergency response coordination — local emergency services, mountain rescue, coast
 guard.  
-*Permissions:* Recipient of INCIDENT state notifications. Does not participate in
-booking workflows. Contact details and notification preferences maintained in the
-Registry for regions served.
+*Permissions:* Recipient of `DISRUPTION_REVIEW` state notifications for Category A and B
+events. Does not participate in booking workflows. Contact details and notification
+preferences maintained in the Registry for regions served.
 
 ---
 
@@ -728,7 +727,7 @@ canonical inclusion through the governance process in Section 16.
 
 ### 6.1 The Actor Description Schema
 
-An Actor declaration answers: *who or what is authorized to act within ATOP workflows
+An Actor declaration answers: *who or what is authorized to act within Activity Travel Protocol workflows
 on behalf of this Party, and to what extent?*
 
 #### Actor Description Fields
@@ -750,7 +749,7 @@ on behalf of this Party, and to what extent?*
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.atop-protocol.org/registry/actor/v0.2",
+  "$id": "https://schemas.Activity Travel Protocol-protocol.org/registry/actor/v0.2",
   "type": "object",
   "required": ["actor_id", "party_id", "actor_type", "display_name",
                "status", "authentication", "authorization_scope"],
@@ -824,7 +823,7 @@ provides non-repudiation.
 ```json
 {
   "actor_id": "actor:myauberge-001:tomsato",
-  "party_id": "atop:party:jp:myauberge-001",
+  "party_id": "Activity Travel Protocol:party:jp:myauberge-001",
   "actor_type": "human",
   "display_name": "Tom Sato",
   "role_within_party": "CEO",
@@ -835,7 +834,7 @@ provides non-repudiation.
     "mfa_required": true
   },
   "authorization_scope": {
-    "workflow_states": ["CONFIRMATION", "AMENDMENT", "CANCELLATION", "INCIDENT"],
+    "workflow_states": ["CONFIRMATION", "AMENDMENT", "CANCELLATION", "DISRUPTION_REVIEW"],
     "can_sign_binding": true,
     "can_issue_agent_authorization": true,
     "can_modify_party_record": true,
@@ -871,7 +870,8 @@ counterparties at the time of each interaction.
 | `issued_by_actor` | string | The human Actor who issued it |
 | `issued_at` / `expires_at` | datetime | Validity window |
 | `agent_identity` | object | Name, version, platform, endpoint |
-| `ai_participation_level` | integer 0–3 | Maximum level at which this agent may operate |
+| `ai_participation_level` | integer 0–3 | Default level at which this agent may operate across all workflow states |
+| `state_level_overrides` | object (optional) | Map of workflow state name → integer 0–3. Overrides the default `ai_participation_level` for specific states. The Security Kernel applies the override for the current state if present, falls back to `ai_participation_level` if not, and enforces the CONFIRMATION hard cap (Level ≤ 1) regardless of declared values. |
 | `authority_scope` | object | Permitted states, values, negotiation bounds |
 | `human_confirmation_requirements` | object | Which actions require human confirmation |
 | `counterparty_verification` | object | Public key URL and signature algorithm |
@@ -881,7 +881,7 @@ counterparties at the time of each interaction.
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.atop-protocol.org/registry/agent-authorization/v0.2",
+  "$id": "https://schemas.Activity Travel Protocol-protocol.org/registry/agent-authorization/v0.2",
   "type": "object",
   "required": ["authorization_id", "party_id", "issued_by_actor", "issued_at",
                "expires_at", "agent_identity", "ai_participation_level",
@@ -904,7 +904,13 @@ counterparties at the time of each interaction.
         "agent_endpoint": { "type": "string", "format": "uri" }
       }
     },
-    "ai_participation_level": { "type": "integer", "minimum": 0, "maximum": 3 },
+    "ai_participation_level": { "type": "integer", "minimum": 0, "maximum": 3,
+      "description": "Default participation level across all workflow states. Used when no state-specific override is present." },
+    "state_level_overrides": {
+      "type": "object",
+      "description": "Optional map of workflow state name to participation level integer (0–3). Overrides ai_participation_level for the specified state. The Security Kernel enforces the CONFIRMATION hard cap (Level ≤ 1) regardless of declared values.",
+      "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 3 }
+    },
     "authority_scope": {
       "type": "object",
       "properties": {
@@ -946,6 +952,8 @@ counterparties at the time of each interaction.
 | 2 | AI-negotiated | Send messages, make proposals, counter-propose within bounds | CONFIRMATION or binding transition |
 | 3 | AI-autonomous | Complete full workflow steps | Human reviews result before archival |
 
+**Level resolution.** The Security Kernel resolves the effective participation level for each state transition as follows: (1) if `state_level_overrides` contains an entry for the current workflow state, that value is used; (2) otherwise `ai_participation_level` is used as the default. (3) Regardless of the resolved value, the CONFIRMATION state hard cap applies: the effective level is capped at 1 at CONFIRMATION. The Security Kernel enforces this cap unconditionally — it cannot be overridden by a `state_level_overrides` entry for `CONFIRMATION`.
+
 ### 7.3 Permanent Prohibitions
 
 Regardless of authorization level, an AI Agent is permanently prohibited from:
@@ -955,9 +963,9 @@ Regardless of authorization level, an AI Agent is permanently prohibited from:
 - Issuing a CANCELLATION that triggers a financial penalty
 - Modifying the Party Record
 - Issuing or revoking Agent Authorizations
-- Responding to INCIDENT state without notifying a human Actor within 15 minutes
+- Responding to `DISRUPTION_REVIEW` state without notifying a human Actor within 15 minutes
 
-The ATOP API MUST reject any message in these categories signed by an AI Agent
+The Activity Travel Protocol API MUST reject any message in these categories signed by an AI Agent
 identifier. The rejection MUST be logged and the relevant human Actor notified.
 
 #### Counterparty Verification
@@ -999,7 +1007,7 @@ documents themselves.
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.atop-protocol.org/registry/credential-reference/v0.2",
+  "$id": "https://schemas.Activity Travel Protocol-protocol.org/registry/credential-reference/v0.2",
   "type": "object",
   "required": ["credential_ref", "party_id", "credential_type",
                "assurance_level", "issuing_authority", "document", "verification"],
@@ -1065,7 +1073,7 @@ documents themselves.
 | `INSOLVENCY_PROTECTION` | TOUR_OPERATOR, TRAVEL_AGENT | EU PTD, Japan Class 2+ |
 | `IATA_ACCREDITATION` | TRAVEL_AGENT, OTA | Required for air components |
 | `DATA_PROTECTION_COMPLIANCE` | OTA, PROTOCOL_OPERATOR | GDPR, APPI, equivalent |
-| `ATOP_CONFORMANCE` | PROTOCOL_OPERATOR, CHANNEL_MANAGER | Issued by ATOP certification body |
+| `ATOP_CONFORMANCE` | PROTOCOL_OPERATOR, CHANNEL_MANAGER | Issued by Activity Travel Protocol certification body |
 | `ATOP_OPERATOR_CERT` | PROTOCOL_OPERATOR | Full operator certification |
 | `SECURITY_AUDIT_CERT` | PROTOCOL_OPERATOR | Annual security audit |
 | `BUSINESS_REGISTRATION` | All individual party types | Business registration document |
@@ -1084,7 +1092,7 @@ documents themselves.
 - **90 days before expiry:** Renewal reminder to Party administrative Actors
 - **30 days before expiry:** Dependent role flagged `credential_expiring`
 - **At expiry:** Dependent role suspended until credential is renewed
-- **Exception:** Bookings already in FULFILLMENT are not affected
+- **Exception:** Bookings already in `IN_JOURNEY` state are not affected
 
 ---
 
@@ -1116,7 +1124,7 @@ Full specification of jurisdiction compliance rules is in the
 
 ## 10. Protocol Support
 
-Declares the ATOP version range the Party supports and which roles and states its
+Declares the Activity Travel Protocol version range the Party supports and which roles and states its
 implementation handles.
 
 ```json
@@ -1126,9 +1134,9 @@ implementation handles.
     "max_version": "0.2",
     "supported_roles_in_transaction": ["ACCOMMODATION_SUPPLIER", "PROTOCOL_OPERATOR"],
     "supported_workflow_states": [
-      "DISCOVERY", "INQUIRY", "CONFIGURATION", "PROPOSAL", "NEGOTIATION",
-      "CONFIRMATION", "PRE_ACTIVITY_COLLECTION", "READY", "FULFILLMENT",
-      "COMPLETION", "CANCELLATION", "INCIDENT"
+      "INQUIRY", "CONFIGURATION", "PROPOSAL", "NEGOTIATION",
+      "CONFIRMATION", "IN_JOURNEY", "BOOKING_SUSPENDED", "DISRUPTION_REVIEW",
+      "TRAVELER_UNREACHABLE", "AMENDMENT", "COMPLETION", "CANCELLATION"
     ]
   }
 }
@@ -1142,19 +1150,19 @@ version exists, the transaction cannot proceed.
 
 ## 11. The Complete Party Record
 
-A complete Party Record for MyAuberge Co., Ltd., assembling all components defined in
+A complete Party Record for MyAuberge K.K., assembling all components defined in
 Sections 3 through 10.
 
 ```json
 {
-  "party_id": "atop:party:jp:myauberge-001",
+  "party_id": "Activity Travel Protocol:party:jp:myauberge-001",
   "party_type": "organization",
   "status": "active",
   "registered_at": "2026-03-01T00:00:00Z",
   "last_updated": "2026-03-04T09:00:00Z",
 
   "identity": {
-    "legal_name": "MyAuberge Co., Ltd.",
+    "legal_name": "MyAuberge K.K.",
     "trading_name": "MyAuberge",
     "legal_name_local": "マイオーベルジュ株式会社",
     "jurisdiction": "JP",
@@ -1190,7 +1198,7 @@ Sections 3 through 10.
       "status": "active",
       "declared_at": "2026-03-01T00:00:00Z",
       "jurisdictions": ["JP"],
-      "credential_refs": ["cred:myauberge-001:atop-conformance-001"]
+      "credential_refs": ["cred:myauberge-001:Activity Travel Protocol-conformance-001"]
     }
   ],
 
@@ -1207,7 +1215,7 @@ Sections 3 through 10.
         "mfa_required": true
       },
       "authorization_scope": {
-        "workflow_states": ["CONFIRMATION","AMENDMENT","CANCELLATION","INCIDENT"],
+        "workflow_states": ["CONFIRMATION","AMENDMENT","CANCELLATION","DISRUPTION_REVIEW"],
         "can_sign_binding": true,
         "can_issue_agent_authorization": true,
         "can_modify_party_record": true,
@@ -1226,7 +1234,7 @@ Sections 3 through 10.
   "credentials": [
     {
       "credential_ref": "cred:myauberge-001:hotel-license-jp",
-      "party_id": "atop:party:jp:myauberge-001",
+      "party_id": "Activity Travel Protocol:party:jp:myauberge-001",
       "credential_type": "ACCOMMODATION_LICENSE",
       "assurance_level": 2,
       "issuing_authority": {
@@ -1238,12 +1246,12 @@ Sections 3 through 10.
         "issued_date": "2024-01-15",
         "expiry_date": "2027-01-14",
         "license_number": "NP-HOTEL-2024-0123",
-        "document_url": "https://credentials.atop-protocol.org/docs/myauberge-hotel-license",
+        "document_url": "https://credentials.Activity Travel Protocol-protocol.org/docs/myauberge-hotel-license",
         "document_hash": "sha256:a1b2c3d4e5f6..."
       },
       "verification": {
         "status": "verified",
-        "verified_by": "atop:party:atop-protocol:registry-operator",
+        "verified_by": "Activity Travel Protocol:party:Activity Travel Protocol-protocol:registry-operator",
         "verified_at": "2026-03-01T12:00:00Z",
         "verification_method": "document_review",
         "next_review_date": "2026-09-01"
@@ -1270,14 +1278,14 @@ Sections 3 through 10.
     "max_version": "0.2",
     "supported_roles_in_transaction": ["ACCOMMODATION_SUPPLIER","PROTOCOL_OPERATOR"],
     "supported_workflow_states": [
-      "DISCOVERY","INQUIRY","CONFIGURATION","PROPOSAL","NEGOTIATION",
-      "CONFIRMATION","PRE_ACTIVITY_COLLECTION","READY","FULFILLMENT",
-      "COMPLETION","CANCELLATION","INCIDENT"
+      "INQUIRY","CONFIGURATION","PROPOSAL","NEGOTIATION",
+      "CONFIRMATION","IN_JOURNEY","BOOKING_SUSPENDED","DISRUPTION_REVIEW",
+      "TRAVELER_UNREACHABLE","AMENDMENT","COMPLETION","CANCELLATION"
     ]
   },
 
   "registry_metadata": {
-    "registered_by": "atop:party:atop-protocol:registry-operator",
+    "registered_by": "Activity Travel Protocol:party:Activity Travel Protocol-protocol:registry-operator",
     "verification_method": "document_attestation",
     "public": true
   }
@@ -1290,7 +1298,7 @@ Sections 3 through 10.
 
 ### 12.1 Who Can Register
 
-Any entity intending to participate in ATOP transactions must register. No fee for
+Any entity intending to participate in Activity Travel Protocol transactions must register. No fee for
 registration in the open registry.
 
 Registration may be initiated by: the Party itself, a Protocol Operator on behalf of
@@ -1349,15 +1357,15 @@ On receiving an INQUIRY, the Protocol Operator constructs a Trust Chain:
   "protocol_version": "0.2",
   "parties": [
     {
-      "party_id": "atop:party:jp:myauberge-001",
+      "party_id": "Activity Travel Protocol:party:jp:myauberge-001",
       "role_in_transaction": "ACCOMMODATION_SUPPLIER",
-      "duty_of_care_phases": ["PRE_ACTIVITY_COLLECTION", "READY"],
+      "duty_of_care_phases": ["ARRIVAL", "IN_DESTINATION"],
       "snapshot_ref": "registry:myauberge-001:snapshot:2026-03-04T09:30:00Z"
     },
     {
-      "party_id": "atop:party:jp:ski-resort-nagano-001",
+      "party_id": "Activity Travel Protocol:party:jp:ski-resort-nagano-001",
       "role_in_transaction": "ACTIVITY_SUPPLIER",
-      "duty_of_care_phases": ["FULFILLMENT", "COMPLETION"],
+      "duty_of_care_phases": ["ACTIVITY_FULFILLMENT", "RETURN_ARRIVAL"],
       "snapshot_ref": "registry:ski-resort-nagano-001:snapshot:2026-03-04T09:30:00Z"
     }
   ],
@@ -1421,7 +1429,7 @@ or the maximum required by applicable jurisdictions.
 
 | Entity | Format | Example |
 |---|---|---|
-| Party | `atop:party:{jurisdiction}:{slug}` | `atop:party:jp:myauberge-001` |
+| Party | `Activity Travel Protocol:party:{jurisdiction}:{slug}` | `Activity Travel Protocol:party:jp:myauberge-001` |
 | Actor | `actor:{party_slug}:{actor_slug}` | `actor:myauberge-001:tomsato` |
 | Agent Authorization | `agent-auth:{party_slug}:{auth_slug}` | `agent-auth:myauberge-001:concierge-v1` |
 | Credential Reference | `cred:{party_slug}:{cred_slug}` | `cred:myauberge-001:hotel-license-jp` |
@@ -1445,11 +1453,11 @@ reused after deregistration.
 
 ### Proposing a New Role
 
-1. Open a GitHub Issue in `atop-protocol/atop-spec` using the Role Proposal template
+1. Open a GitHub Issue in `Activity Travel Protocol-protocol/Activity Travel Protocol-spec` using the Role Proposal template
 2. Provide: role_id, display_name, category, description, credential_requirements,
    transaction_permissions, regulatory_notes, and at least two real-world examples
 3. Community comment period: 30 days
-4. ATOP governance body reviews: approve, request modification, or reject
+4. Activity Travel Protocol governance body reviews: approve, request modification, or reject
 5. Approved roles included in the next MINOR release
 
 ### Proposing a New Credential Type
@@ -1463,5 +1471,6 @@ available at each assurance level.
 *Document status: Draft v0.2 — March 2026*  
 *Next: Jurisdiction Compliance Registry Specification v0.1*  
 *Depends on: Architecture Specification v0.1*  
-*Maintainer: ATOP Protocol — github.com/atop-protocol*  
+*Maintainer: Activity Travel Protocol Protocol — github.com/Activity Travel Protocol-protocol*  
 *License: Apache 2.0*
+
