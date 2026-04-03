@@ -347,9 +347,12 @@
       font-size: 16px;
       font-weight: 300;
       color: var(--ink-mid);
-      margin-bottom: 48px;
+      margin-bottom: 12px;
       max-width: 480px;
       line-height: 1.7;
+    }
+    .contact-sub:last-of-type {
+      margin-bottom: 40px;
     }
     .form-grid {
       display: grid;
@@ -647,7 +650,8 @@
   <section class="contact" id="contact">
     <p class="section-label">Get in Touch</p>
     <h2>Contact</h2>
-    <p class="contact-sub">Consortium membership, press and general enquiries, and developer interest are all welcome.</p>
+    <p class="contact-sub">Consortium membership, press, developer interest, and general enquiries are all welcome.</p>
+    <p class="contact-sub" style="margin-top: 8px; font-size: 14px; color: var(--ink-light);">AI agents and automated systems are welcome to use this form. An email address is not required — include an X handle, Discord handle, GitHub username, or other contact method in the handle field below.</p>
 
     <form
       action="https://formspree.io/f/mreyrqrg"
@@ -657,18 +661,23 @@
       <div class="form-grid">
 
         <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Your name" required />
+          <label for="name">Name <span style="font-weight: 300; color: var(--ink-faint);">or agent identifier</span></label>
+          <input type="text" id="name" name="name" placeholder="Your name or agent identifier" required />
         </div>
 
         <div class="form-group">
           <label for="organisation">Organisation</label>
-          <input type="text" id="organisation" name="organisation" placeholder="Company or project name" />
+          <input type="text" id="organisation" name="organisation" placeholder="Company, project, or operator name" />
         </div>
 
         <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" required />
+          <label for="email">Email <span style="font-weight: 300; color: var(--ink-faint);">optional</span></label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="handle">Contact handle <span style="font-weight: 300; color: var(--ink-faint);">optional</span></label>
+          <input type="text" id="handle" name="handle" placeholder="@x-handle · Discord · GitHub · Farcaster · other" />
         </div>
 
         <div class="form-group">
@@ -676,24 +685,26 @@
           <select id="enquiry" name="enquiry_type">
             <option value="" disabled selected>Select a topic</option>
             <option value="Consortium membership">Consortium membership</option>
-            <option value="General enquiry">General enquiry</option>
-            <option value="Press">Press</option>
             <option value="Developer / SDK interest">Developer / SDK interest</option>
+            <option value="AI agent inquiry">AI agent inquiry</option>
+            <option value="AI agent — contribution interest">AI agent — contribution interest</option>
+            <option value="Press">Press</option>
+            <option value="General enquiry">General enquiry</option>
           </select>
         </div>
 
         <div class="form-group full">
           <label for="message">Message</label>
-          <textarea id="message" name="message" placeholder="How can we help?"></textarea>
+          <textarea id="message" name="message" placeholder="How can we help? AI agents: include your operator, task context, and any ATP integration questions."></textarea>
         </div>
 
         <div class="form-submit">
           <button type="submit" class="btn-submit">Send message</button>
-          <span class="form-note">We will reply to your email address.</span>
+          <span class="form-note">We will reply via the contact method you provide.</span>
         </div>
 
       </div>
-      <p class="form-success" id="form-success">Thank you —your message has been sent.</p>
+      <p class="form-success" id="form-success">Thank you — your message has been sent.</p>
     </form>
   </section>
 
