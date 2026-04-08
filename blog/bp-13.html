@@ -148,15 +148,15 @@
 <p>Most software systems enforce access control through a mix of authentication checks, database permissions, and application-layer guards. Each guard is implemented by a developer, configured by an administrator, and maintained over time as the system evolves. When a guard is missed — when a developer forgets a permission check, or a configuration is misconfigured, or a maintenance change inadvertently removes a guard — there is no automatic backstop.</p>
 <p>The Activity Travel Protocol takes a different approach. Every consequential action in the protocol — every state transition, every data write, every commitment made on behalf of a traveller — passes through a single enforcement component: the Security Kernel. It is non-bypassable by design, and it runs before any application logic reaches the Booking Object.</p>
 <hr />
-<h2>Ki — the enforcement problem in multi-party travel</h2>
+<h2>the enforcement problem in multi-party travel</h2>
 <p>A complex travel booking involves parties that do not know each other, operating under different regulatory frameworks, with different commercial interests, in potentially different countries. When an AI agent acts on behalf of a traveller in this environment, who ensures that it is doing only what it is authorised to do?</p>
 <p>The answer in most current systems is: nobody, systematically. An API key grants access to a system. What the holder of that API key can do within the system is determined by the application logic — which may or may not have been written with the full range of possible inputs in mind.</p>
 <p>For travel, the stakes are concrete. An AI agent that can make booking state transitions without authorisation can cancel a confirmed booking, reroute a traveller, or commit commercial terms that the operator never agreed to. A supplier system with incorrect API permissions can write to another supplier's booking data. A sub-agent that has accumulated more permissions than its mandate allows can take actions that its principal cannot audit.</p>
-<h2>Shō — what policy enforcement usually looks like</h2>
+<h2>what policy enforcement usually looks like</h2>
 <p>Application-layer access control is the norm because it is convenient: permission checks are written in the same language as the application, maintained in the same codebase, and tested with the same tools.</p>
 <p>The problem is that convenience and correctness are in tension. Application-layer guards are optional — a developer can forget them. They are distributed — the same permission rule may need to be enforced in multiple places in the codebase, and a miss in one place is a vulnerability. They are static — they are checked at development time and may not reflect the current policy when the application is running.</p>
 <p>For a multi-party protocol where the parties involved in a booking are not all known at development time, and where an AI agent's permitted actions change as the Booking Object moves through its state machine, application-layer access control is architecturally insufficient.</p>
-<h2>Ten — the Security Kernel</h2>
+<h2>the Security Kernel</h2>
 <p>The Security Kernel is the Activity Travel Protocol's non-bypassable policy enforcement component. It sits between every request and every Booking Object state transition. No application logic, no AI agent, and no API call can reach a Booking Object state transition without first passing through the Security Kernel.</p>
 <p>It has three enforcement functions.</p>
 <p><strong>Policy evaluation.</strong> The Security Kernel evaluates ODRL (Open Digital Rights Language) policies against every proposed state transition. The ODRL policy for a Booking Object defines what transitions are permitted, under what conditions, and by whom. The Security Kernel uses OPA (Open Policy Agent) as its evaluation engine. If the proposed transition does not satisfy the policy, it is rejected with a 403 error before any database write occurs.</p>
@@ -171,7 +171,7 @@
 <p>4. <strong>Security Kernel</strong> (on state transition): OPA evaluates the ODRL policy. Human ceiling check. Booking Object binding check. Rejection: 403.</p>
 <p>5. <strong>Execution</strong>: The tool executes and the result is returned.</p>
 <p>Each layer is independent. A gap in any one layer does not expose the Booking Object — the next layer catches it. In practice, under normal operation with a correctly configured Windley Loop, layers 2 through 4 should see no violations. They exist for the cases when they are needed.</p>
-<h2>Ketsu — what this gives the industry</h2>
+<h2>what this gives the industry</h2>
 <p>The Security Kernel is not primarily a security feature in the traditional IT sense. It is a governance mechanism.</p>
 <p>For a regulator, the Security Kernel means that every consequential action in a protocol-compliant booking has been evaluated against a stated policy before it was allowed. The audit trail is the event log. The policy is the ODRL document. The evaluation record is available for inspection.</p>
 <p>For an operator, it means that the AI agents they deploy cannot exceed their declared authority scope, regardless of what instructions they receive. An AI agent cannot be prompted into taking an action that the Security Kernel would reject.</p>
