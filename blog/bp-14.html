@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI agents in the Activity Travel Protocol — how they work — Activity Travel Protocol</title>
+  <meta name="description" content="What an ATP Mandate JWT is, how eight authority scopes constrain agent behaviour, what the Windley Loop does before planning, and why no AI agent can confirm a booking without a human." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:          #0f1a14;
+      --ink-mid:      #2e4038;
+      --ink-light:    #5a7266;
+      --ink-faint:    #94aaa0;
+      --paper:        #f5f2eb;
+      --paper-dark:   #ede9e0;
+      --accent:       #1e6b45;
+      --accent-light: #2e8f5c;
+      --rule:         #d4cfc4;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans:  'DM Sans', system-ui, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+    }
+    .nav-brand { font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; letter-spacing: 0.01em; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-light); text-decoration: none; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.nav-subscribe { color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; padding: 4px 12px; font-size: 12px; }
+    .nav-links a.nav-subscribe:hover { background: var(--accent); color: #fff; }
+    /* BREADCRUMB */
+    .breadcrumb { max-width: 720px; margin: 0 auto; padding: 28px 40px 0; font-size: 12px; color: var(--ink-faint); display: flex; align-items: center; gap: 8px; }
+    .breadcrumb a { color: var(--ink-faint); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb span { color: var(--ink-faint); }
+    /* ARTICLE */
+    article { max-width: 720px; margin: 0 auto; padding: 40px 40px 96px; }
+    .post-arc { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 2px; padding: 4px 10px; display: inline-block; margin-bottom: 28px; }
+    h1 { font-family: var(--serif); font-size: clamp(28px, 4vw, 42px); line-height: 1.1; color: var(--ink); margin-bottom: 24px; letter-spacing: -0.02em; }
+    .post-meta { display: flex; align-items: center; gap: 20px; margin-bottom: 12px; flex-wrap: wrap; }
+    .post-date { font-size: 13px; color: var(--ink-faint); }
+    .post-audience-tag { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--ink-faint); text-transform: uppercase; }
+    .author-block { display: flex; align-items: center; gap: 14px; padding: 20px 0 36px; border-bottom: 1px solid var(--rule); margin-bottom: 40px; }
+    .author-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 13px; color: #fff; flex-shrink: 0; }
+    .author-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .author-title { font-size: 12px; color: var(--ink-faint); margin-top: 1px; }
+    .author-contact { font-size: 12px; color: var(--accent); text-decoration: none; }
+    .author-contact:hover { text-decoration: underline; }
+    /* PROSE */
+    .prose h2 { font-family: var(--serif); font-size: 24px; color: var(--ink); margin: 48px 0 16px; letter-spacing: -0.01em; line-height: 1.25; }
+    .prose h2:first-child { margin-top: 0; }
+    .prose p { font-size: 16px; font-weight: 300; color: var(--ink-mid); line-height: 1.8; margin-bottom: 20px; }
+    .prose strong { font-weight: 500; color: var(--ink); }
+    .prose em { font-style: italic; }
+    .prose a { color: var(--accent); text-decoration: none; }
+    .prose a:hover { text-decoration: underline; }
+    .prose ul, .prose ol { margin: 0 0 20px 24px; }
+    .prose li { font-size: 16px; font-weight: 300; color: var(--ink-mid); line-height: 1.8; margin-bottom: 6px; }
+    .prose code { font-family: monospace; font-size: 14px; background: var(--paper-dark); padding: 2px 6px; border-radius: 2px; color: var(--ink); }
+    .prose blockquote { border-left: 3px solid var(--accent); padding-left: 20px; margin: 24px 0; }
+    .prose blockquote p { color: var(--ink-light); font-style: italic; }
+    .prose hr { border: none; border-top: 1px solid var(--rule); margin: 40px 0; }
+    .prose table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+    .prose th { text-align: left; font-weight: 500; color: var(--ink); border-bottom: 2px solid var(--rule); padding: 8px 12px; }
+    .prose td { border-bottom: 1px solid var(--rule); padding: 10px 12px; color: var(--ink-mid); font-weight: 300; vertical-align: top; }
+    /* SPEC LINKS */
+    .spec-links { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule); }
+    .spec-links p { font-size: 13px; font-style: italic; color: var(--ink-faint); line-height: 1.7; }
+    .spec-links a { color: var(--accent); text-decoration: none; }
+    .spec-links a:hover { text-decoration: underline; }
+    /* NAV NEXT */
+    .post-nav { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 20px; }
+    .post-nav-item { flex: 1; }
+    .post-nav-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+    .post-nav-title { font-size: 14px; color: var(--accent); text-decoration: none; line-height: 1.4; }
+    .post-nav-title:hover { text-decoration: underline; }
+    /* FOOTER */
+    footer { border-top: 1px solid var(--rule); padding: 28px 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-left { font-size: 13px; color: var(--ink-faint); }
+    .footer-left a { color: var(--ink-faint); text-decoration: none; }
+    .footer-left a:hover { color: var(--ink-light); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-size: 13px; color: var(--ink-faint); text-decoration: none; transition: color 0.2s; }
+    .footer-right a:hover { color: var(--ink-light); }
+    /* RESPONSIVE */
+    @media (max-width: 680px) {
+      nav { padding: 0 20px; }
+      .nav-links { gap: 16px; }
+      article, .breadcrumb { padding-left: 24px; padding-right: 24px; }
+      footer { padding: 24px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="https://activitytravel.org/">Activity Travel Protocol</a>
+    <ul class="nav-links">
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="https://activitytravel.pro">Specification</a></li>
+      <li><a href="https://github.com/activity-travel-protocol/protocol-spec">GitHub</a></li>
+      <li><a href="https://activitytravel.org/#contact">Contact</a></li>
+      <li><a href="https://activitytravel.org/#subscribe" class="nav-subscribe">Subscribe</a></li>
+    </ul>
+  </nav>
+
+  <div class="breadcrumb">
+    <a href="https://activitytravel.org/blog/">Blog</a>
+    <span>›</span>
+    <span>Arc 4 — Technical Foundations</span>
+  </div>
+
+  <article>
+    <span class="post-arc">Arc 4 — Technical Foundations</span>
+    <h1>AI agents in the Activity Travel Protocol — how they work</h1>
+    <div class="post-meta">
+      <span class="post-date">8 April 2026</span>
+      <span class="post-audience-tag">AI platform builders · Developers</span>
+    </div>
+    <div class="author-block">
+      <div class="author-avatar">TS</div>
+      <div>
+        <div class="author-name">Tom Sato</div>
+        <div class="author-title">Founding Maintainer, Activity Travel Protocol</div>
+        <a class="author-contact" href="https://activitytravel.org/#contact">Contact →</a>
+      </div>
+    </div>
+    <div class="prose">
+<hr />
+<p>The phrase "AI agent" is used loosely in travel technology discussions. It describes everything from a chatbot that answers FAQ questions to a system that autonomously assembles and books a multi-supplier itinerary. These are not the same thing. The gap between them — in terms of what the AI is actually doing, what authority it holds, and what happens when it gets something wrong — is significant.</p>
+<p>The Activity Travel Protocol gives AI agents a precise definition: what they can do, how they identify themselves, what constrains them, and how they interact with the humans they act on behalf of. This post explains the architecture.</p>
+<hr />
+<h2>Ki — the authority problem</h2>
+<p>When a person books a hotel room through a website, the system knows exactly who is taking the action. The user is authenticated. Their permissions within the system are clear. If they do something unexpected, there is a person who can be contacted.</p>
+<p>When an AI agent books a hotel room on behalf of a person, none of those properties hold automatically. The agent is not a person. It may be one of many instances running simultaneously. Its "authority" to act — the scope of what it is permitted to do on the traveller's behalf — is typically implicit, defined by whatever prompt the developer wrote and whatever API keys were configured.</p>
+<p>For low-stakes actions, this is manageable. For a multi-supplier travel booking involving payment, supplier commitments, regulatory compliance, and traveller welfare, it is not. An AI agent that can make booking commitments without a machine-verifiable authority scope is, from the perspective of every other party in the booking, an unidentified actor making claims about permissions it may or may not actually hold.</p>
+<h2>Shō — how existing systems handle agent access</h2>
+<p>Most current approaches to AI agent access in travel systems use one of two patterns.</p>
+<p>The first is API key delegation: the AI agent is given the same API key as the user or application. It has whatever permissions the key has, with no further constraint. There is no machine-readable record of what the agent was permitted to do versus what the application can do. If the agent takes an action that causes a problem, the only audit trail is application logs.</p>
+<p>The second is operator-side restriction: the system exposes a limited API surface to the AI agent — read-only endpoints, no write access, no booking state changes. This is safe but makes it impossible to build anything more than a discovery or recommendation tool. The agent cannot actually do the booking; a human has to switch systems and complete it.</p>
+<p>Neither pattern supports a fully capable, governed AI travel agent.</p>
+<h2>Ten — the Activity Travel Protocol agent architecture</h2>
+<p>The Activity Travel Protocol defines AI agent participation as a first-class architectural concern. Every aspect of how an agent identifies itself, what it can do, and how it is constrained is specified in the protocol.</p>
+<p><strong>Identity: the ATP Mandate JWT.</strong></p>
+<p>Every AI agent session begins with the issuance of an ATP Mandate JWT — a cryptographically signed token (Ed25519/EdDSA) that declares the agent's identity and permitted authority scope. The mandate is co-issued with the OAuth 2.1 access token at session initialisation. It carries a Cedar policy set that defines exactly which actions the agent can take, on which Booking Object, and under what conditions.</p>
+<p>The mandate is not a capability claim — it is a verifiable cryptographic assertion. The Security Kernel verifies the Ed25519 signature on every action. A forged or altered mandate is rejected.</p>
+<p><strong>Scope: eight authority scopes.</strong></p>
+<p>Agent permissions are expressed as Cedar action namespaces — eight defined scopes that cover the full range of protocol operations:</p>
+<ul>
+<li><strong>CONTEXT_READ</strong> — read the Booking Object's Context Package and status</li>
+<li><strong>NOTIFICATION_SEND</strong> — send notifications to participants via WhatsApp, SMS, or email</li>
+<li><strong>PRE_ARRANGEMENT_WRITE</strong> — collect and update pre-trip participant data</li>
+<li><strong>HEM_INVOKE</strong> — invoke the Human Escalation Manager (highest privilege; requires explicit hem_id enumeration in the mandate)</li>
+<li><strong>SAFETY_WRITE</strong> — record safety compliance checks to the immutable event log</li>
+<li><strong>BOOKING_READ</strong> — search the Activity Configuration Schema registry</li>
+<li><strong>BOOKING_WRITE</strong> — booking lifecycle operations (v1.1+)</li>
+<li><strong>DISRUPTION_MANAGE</strong> — disruption review state access</li>
+</ul>
+<p>No agent receives all scopes. A Guest Agent communicating with travellers via WhatsApp needs CONTEXT_READ, NOTIFICATION_SEND, PRE_ARRANGEMENT_WRITE, and restricted HEM_INVOKE. It does not need SAFETY_WRITE or DISRUPTION_MANAGE. The mandate carries only what is needed.</p>
+<p><strong>The narrowing property: sub-agent delegation.</strong></p>
+<p>When an AI agent delegates to a sub-agent, it issues a sub-mandate. The narrowing property is a Security Kernel enforcement rule: a sub-mandate must be a provable subset of the issuing agent's own mandate. An agent cannot delegate authority it does not hold. The delegation chain — from the root mandate issued at operator level to the leaf sub-agents working on specific booking tasks — is cryptographically verifiable at every link.</p>
+<p><strong>The Windley Loop: planning within scope.</strong></p>
+<p>Before an ATP agent plans any tool call sequence, it performs a mandatory Cedar partial evaluation query against its mandate. This query returns the residual policy set: the exact set of actions and resource conditions permitted in the current Booking Object state. The agent's planning is bounded by this set. It does not generate tool calls for actions it cannot execute.</p>
+<p>This is the distinction between a gate and a map. A gate stops an agent after it has planned and attempted an unpermitted action. A map tells the agent what terrain is available before it plans. The Windley Loop is the map. NeMo Guardrails Rail 3 is the belt-and-suspenders gate for any action that slips through.</p>
+<p><strong>The CONFIRMATION hard cap: the human ceiling.</strong></p>
+<p>Regardless of an agent's authority scope, no booking confirmation can be completed without a human approval step. This is a Security Kernel enforcement rule, not a convention. The CONFIRMATION gate is the point at which commercial commitments become binding — and the protocol's position is that a human must be in the loop at that point, every time.</p>
+<p><strong>Human Escalation Manager: structured escalation.</strong></p>
+<p>When a situation exceeds an agent's authority — a disruption that requires operator judgment, a traveller welfare concern that requires human intervention, a mandate gap that requires scope expansion — the agent escalates via the Human Escalation Manager. The escalation is structured: the agent names the specific action it cannot take, the reason, and its assessment. The operator receives a clear, actionable escalation request, not an undifferentiated alert.</p>
+<h2>Ketsu — four agent personas in the protocol</h2>
+<p>The Activity Travel Protocol defines four named agent personas, each with a specific function, authority scope, and tool surface:</p>
+<p><strong>Guest Agent.</strong> Communicates with travellers via WhatsApp and LINE. Collects pre-trip data, answers booking questions, relays disruption information. Authority: CONTEXT_READ, NOTIFICATION_SEND, PRE_ARRANGEMENT_WRITE, restricted HEM_INVOKE.</p>
+<p><strong>Operator Agent.</strong> Supports operator staff in disruption management and HEM review. Has access to the full HEM catalogue (subject to mandate). Coordinates supplier notifications and rebooking decisions. Authority: full operational scope including DISRUPTION_MANAGE.</p>
+<p><strong>Supplier Agent.</strong> Supports suppliers in fulfilling their booking obligations. Reads pre-arrangement data relevant to their activity component. Records safety compliance checks. Escalates supply-side failures. Authority: CONTEXT_READ (read), SAFETY_WRITE, restricted HEM_INVOKE.</p>
+<p><strong>Discovery Agent.</strong> Pre-booking activity search and capability matching. No write authority, no HEM access. Surfaces Capability Declarations to travellers considering a booking. Authority: BOOKING_READ only.</p>
+<p>Each persona has a system prompt template in the <code>@atp/llms-tooling</code> Prompt Library that defines its instruction set, tool surface, and behavioural constraints in plain language the LLM can reason about.</p>
+<p>The result is an AI agent architecture that is not defined by what a developer remembered to restrict. It is defined by what the protocol specifies, cryptographically enforced at every action, and auditable after the fact from the Booking Object's immutable event log.</p>
+    </div>
+    <div class="spec-links">
+      <p><em>Read more in the spec: <a href="https://activitytravel.pro/layer3/">activitytravel.pro/layer3/</a> — AI agent participation, mandate model, Windley Loop | <a href="https://activitytravel.pro/layer1/">activitytravel.pro/layer1/</a> — trust chain and credential verification</em></p>
+    </div>
+    <div class="post-nav">
+      <div class="post-nav-item">
+        <div class="post-nav-label">Previous</div>
+        <a class="post-nav-title" href="./bp-13.html">The Security Kernel: how the protocol enforces trust</a>
+      </div>
+      <div class="post-nav-item" style="text-align:right">
+        <div class="post-nav-label">Next</div>
+        <a class="post-nav-title" href="./bp-20.html">Verifiable credentials in travel: what the protocol verifies and why it matters</a>
+      </div>
+    </div>
+  </article>
+
+  <footer>
+    <div class="footer-left">
+      Apache 2.0 &nbsp;·&nbsp; Founded by <a href="https://myauberge.com">MyAuberge K.K.</a> &nbsp;·&nbsp; <a href="https://activitytravel.pro">activitytravel.pro</a>
+    </div>
+    <div class="footer-right">
+      <a href="https://activitytravel.org/#subscribe">Subscribe</a>
+      <a href="https://activitytravel.pro">Specification</a>
+      <a href="https://github.com/activity-travel-protocol/protocol-spec">GitHub</a>
+      <a href="https://activitytravel.org/#contact">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
