@@ -228,8 +228,9 @@
     .post-read::after { content: ' →'; }
     .post-card:hover .post-read { text-decoration: underline; }
 
-    /* Arc 3 has 3 posts — last card spans both columns */
-    .post-grid.arc3 .post-card:last-child:nth-child(odd) {
+    /* Arc 3 has 3 posts, Arc 4 has 7 posts — last card spans both columns when odd */
+    .post-grid.arc3 .post-card:last-child:nth-child(odd),
+    .post-grid.arc4 .post-card:last-child:nth-child(odd) {
       grid-column: 1 / -1;
       max-width: 50%;
     }
@@ -276,7 +277,8 @@
       .hero, .content, .section-rule { padding-left: 24px; padding-right: 24px; }
       .hero { padding-top: 56px; }
       .post-grid { grid-template-columns: 1fr; }
-      .post-grid.arc3 .post-card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; }
+      .post-grid.arc3 .post-card:last-child:nth-child(odd),
+      .post-grid.arc4 .post-card:last-child:nth-child(odd) { grid-column: auto; max-width: 100%; }
       footer { padding: 24px; flex-direction: column; align-items: flex-start; }
     }
   </style>
@@ -297,7 +299,7 @@
   <section class="hero">
     <span class="hero-eyebrow">Blog</span>
     <h1>Perspectives on<br /><em>AI-native travel</em></h1>
-    <p class="hero-tagline">Protocol design, policy, and the future of the travel industry — from the team behind the Activity Travel Protocol. Three arcs. Every post stands alone.</p>
+    <p class="hero-tagline">Protocol design, policy, and the future of the travel industry — from the team behind the Activity Travel Protocol. Four arcs. Every post stands alone.</p>
   </section>
 
   <div class="section-rule"><hr /></div>
@@ -477,6 +479,86 @@
           <div class="post-desc">Having named the structural problems, this post proposes the specific provisions that modernised travel regulation should contain — drawn from a systematic review across five jurisdictions.</div>
           <div class="post-footer">
             <span class="post-audience">Regulators · Policy makers · Trade press</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ARC 4 -->
+    <div class="arc-block">
+      <p class="arc-eyebrow">Technical foundations</p>
+      <h2 class="arc-title">How the protocol works under the hood</h2>
+      <p class="arc-desc">For developers, AI platform builders, and technically curious business readers.</p>
+      <div class="post-grid arc4">
+
+        <a class="post-card" href="./bp-10.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">The Booking Object: a new primitive for the travel industry</div>
+          <div class="post-desc">Travel has never had a runtime entity representing a booking in its entirety. The Booking Object is that missing primitive — UUID-identified, state-managed, append-only, and role-scoped.</div>
+          <div class="post-footer">
+            <span class="post-audience">Developers · AI platform builders</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-11.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">How disruption handling works in the Activity Travel Protocol</div>
+          <div class="post-desc">Disruption is a formal Booking Object state, not a special case. How the protocol handles 340 typhoon-affected bookings in parallel — supplier notification, human escalation, and traveller welfare chains.</div>
+          <div class="post-footer">
+            <span class="post-audience">Technical business readers · Tour operators · Developers</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-12.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">Building your first Activity Travel Protocol integration</div>
+          <div class="post-desc">Three integration surfaces, one protocol. REST/Webhook for existing systems, MCP Server for AI agents, Prompt Library for LLM personas. What a first integration looks like at each tier.</div>
+          <div class="post-footer">
+            <span class="post-audience">Developers · Startup founders · AI builders</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-13.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">The Security Kernel: how the protocol enforces trust</div>
+          <div class="post-desc">Every consequential action passes through a single non-bypassable enforcement component. ODRL policy evaluation, mandate verification, and the CONFIRMATION hard cap — in sequence, every time.</div>
+          <div class="post-footer">
+            <span class="post-audience">Developers · Platform operators · Technically curious business readers</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-14.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">AI agents in the Activity Travel Protocol — how they work</div>
+          <div class="post-desc">What an ATP Mandate JWT is, how eight authority scopes constrain agent behaviour, what the Windley Loop does before planning, and why no AI agent can confirm a booking without a human.</div>
+          <div class="post-footer">
+            <span class="post-audience">AI platform builders · Developers</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-20.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">Verifiable credentials in travel: what the protocol verifies and why it matters</div>
+          <div class="post-desc">Traveller credentials, operator credentials — and why both are verified at every state transition, not just at onboarding. One submission, network-wide recognition.</div>
+          <div class="post-footer">
+            <span class="post-audience">Platform operators · OTAs · Insurers · Compliance teams</span>
+            <span class="post-read">Read</span>
+          </div>
+        </a>
+
+        <a class="post-card" href="./bp-21.html">
+          <div class="post-date">8 April 2026</div>
+          <div class="post-title">The AI agent credential problem: a new kind of identity for Travel Operating Systems</div>
+          <div class="post-desc">The third credential category that has no precedent in travel: the AI agent credential. What the ATP Mandate JWT is, why it satisfies EU AI Act and IMDA Agentic AI Framework requirements, and why it matters.</div>
+          <div class="post-footer">
+            <span class="post-audience">Platform operators · Developers · Regulators with AI governance interest</span>
             <span class="post-read">Read</span>
           </div>
         </a>
