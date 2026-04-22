@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arc 5: The Traveller Layer — Activity Travel Protocol</title>
+<meta name="description" content="The Activity Travel Protocol adds the Traveller Identity Layer — making the traveller a first-class participant in the protocol, not a data field inside a Booking Object.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #0f1117;
+    --ink-mid: #3a3d47;
+    --ink-light: #767b8a;
+    --paper: #fafaf8;
+    --paper-warm: #f4f0e8;
+    --accent: #1a4b8c;
+    --accent-mid: #2e6bc4;
+    --accent-light: #dde8f7;
+    --rule: #e2ddd6;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    border-bottom: 1px solid var(--rule);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-light);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* HERO */
+  .hero {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 80px 40px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .arc-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-mid);
+    margin-bottom: 28px;
+  }
+  .arc-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent-mid);
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(38px, 6vw, 58px);
+    line-height: 1.1;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 28px;
+    letter-spacing: -0.01em;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-standfirst {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+    font-weight: 300;
+    max-width: 640px;
+    margin-bottom: 40px;
+  }
+
+  .byline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+  .byline-sep { color: var(--rule); }
+  .byline strong { color: var(--ink-mid); font-weight: 500; }
+
+  /* BODY */
+  .body {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 64px 40px 100px;
+  }
+
+  .body h2 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 64px 0 20px;
+    line-height: 1.2;
+  }
+
+  .body p {
+    margin-bottom: 24px;
+    color: var(--ink-mid);
+  }
+
+  .body p + p { margin-top: 0; }
+
+  /* PULL QUOTE */
+  .pull-quote {
+    border-left: 3px solid var(--accent);
+    margin: 48px 0;
+    padding: 24px 32px;
+    background: var(--accent-light);
+  }
+  .pull-quote p {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--accent);
+    font-weight: 400;
+    font-style: italic;
+    margin: 0;
+  }
+
+  /* CALLOUT */
+  .callout {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 28px 32px;
+    margin: 40px 0;
+  }
+  .callout-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+  }
+  .callout p {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin: 0;
+  }
+
+  /* COMPARISON TABLE */
+  .precedent-table {
+    margin: 40px 0;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .precedent-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .precedent-table thead tr {
+    background: var(--ink);
+    color: white;
+  }
+  .precedent-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .precedent-table tbody tr { border-bottom: 1px solid var(--rule); }
+  .precedent-table tbody tr:last-child { border-bottom: none; }
+  .precedent-table tbody tr:nth-child(even) { background: var(--paper-warm); }
+  .precedent-table tbody td {
+    padding: 14px 16px;
+    color: var(--ink-mid);
+    vertical-align: top;
+  }
+  .precedent-table tbody td:first-child { font-weight: 500; color: var(--ink); }
+
+  /* FEATURE LIST */
+  .feature-list {
+    margin: 32px 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .feature-list li {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent-mid);
+    letter-spacing: 0.04em;
+    padding-top: 2px;
+    line-height: 1.5;
+  }
+  .feature-desc {
+    font-size: 14px;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  /* SCENARIO */
+  .scenario {
+    background: var(--ink);
+    color: #e8e4dc;
+    padding: 36px 36px;
+    margin: 48px 0;
+    border-radius: 2px;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .scenario-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6a7a9a;
+    margin-bottom: 16px;
+  }
+  .scenario p { color: #c8c4bc; margin-bottom: 12px; }
+  .scenario p:last-child { margin-bottom: 0; }
+  .scenario strong { color: #e8e4dc; font-weight: 500; }
+  .scenario em { color: #8aaddc; font-style: normal; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 56px 0;
+  }
+
+  /* FOOTER CALLOUT */
+  .footer-callout {
+    border-top: 3px solid var(--ink);
+    padding-top: 40px;
+    margin-top: 72px;
+  }
+  .footer-callout p {
+    font-size: 15px;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+  }
+  .footer-callout a {
+    color: var(--accent-mid);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* POST FOOTER */
+  .post-footer {
+    border-top: 1px solid var(--rule);
+    padding: 48px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+  .post-footer a {
+    color: var(--accent-mid);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  @media (max-width: 640px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 48px 20px 40px; }
+    .body { padding: 40px 20px 80px; }
+    .feature-list li { grid-template-columns: 1fr; gap: 8px; }
+    .post-footer { flex-direction: column; gap: 16px; padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://activitytravel.org" class="nav-brand">Activity Travel Protocol</a>
+  <ul class="nav-links">
+    <li><a href="https://activitytravel.pro">Specification</a></li>
+    <li><a href="https://activitytravel.org/blog">Blog</a></li>
+    <li><a href="https://activitytravel.org">Foundation</a></li>
+  </ul>
+</nav>
+
+<article>
+
+  <div class="hero">
+    <div class="arc-label">Arc 5 &mdash; The Traveller Layer</div>
+
+    <h1>The one party we hadn&rsquo;t<br>yet made <em>real</em></h1>
+
+    <p class="hero-standfirst">
+      The Activity Travel Protocol has given every operator, supplier, travel agency, and AI agent a verified, machine-readable identity. Today we add the most important party of all.
+    </p>
+
+    <div class="byline">
+      <strong>Tom Sato</strong>
+      <span class="byline-sep">&mdash;</span>
+      <span>CEO, MyAuberge K.K. &middot; Founding Chair, Activity Travel Protocol Foundation</span>
+      <span class="byline-sep">&mdash;</span>
+      <span>April 2026</span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <p>Four arcs. Two years. One question answered at every layer: what does it mean for a machine to participate in a travel booking with the same trust, accountability, and authority that a human professional brings to it?</p>
+
+    <p>Arc 1 established identity and trust for operators and suppliers &mdash; the cryptographic foundations that let two parties who have never met transact with confidence. Arc 2 gave suppliers a machine-readable voice: here is what I offer, here is how it works, here is what I need to know about your guest. Arc 3 made the booking itself a live entity &mdash; not a database record that gets updated, but a process that runs, that fires events, that carries the guest from inquiry to completion and handles every disruption along the way. Arc 4 turned the protocol into software that developers can implement.</p>
+
+    <p>In every one of those arcs, the traveller appears. They&rsquo;re there as a name, an email address, a phone number &mdash; the person the whole system is for. But they are not, in the current specification, a <em>party</em>. They don&rsquo;t have a Party Record. They don&rsquo;t authenticate. They haven&rsquo;t explicitly authorised the AI agent that coordinates their journey on their behalf. They are, in protocol terms, a data field inside a Booking Object.</p>
+
+    <p>That was always the plan. And it was always the right one.</p>
+
+    <h2>Why operators come first</h2>
+
+    <p>The traveller&rsquo;s identity, in the Activity Travel Protocol, federates through the operator&rsquo;s identity &mdash; just as a passenger&rsquo;s identity in an airline system runs through the airline&rsquo;s verified infrastructure. The trust anchors have to exist before you can federate through them. This is not a deferral. It is the architecturally correct order.</p>
+
+    <p>Every significant open protocol has built identity in layers. OAuth 2.0 shipped in 2012 without OpenID Connect &mdash; consumer identity came as a deliberate second layer in 2014. The airline industry&rsquo;s NDC standard launched in 2012 with supplier and distribution schemas; traveller identity and personalisation arrived in NDC 21.3 in 2021. OpenTravel Alliance defined supplier schemas for years before addressing travellers. These weren&rsquo;t gaps. They were stages.</p>
+
+    <div class="precedent-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Protocol</th>
+            <th>Layer 1 (trust anchors)</th>
+            <th>Consumer identity (when)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OAuth 2.0 / OIDC</td>
+            <td>Server-to-server authorisation, 2012</td>
+            <td>OpenID Connect 1.0, 2014</td>
+          </tr>
+          <tr>
+            <td>IATA NDC</td>
+            <td>Airline distribution schema, 2012</td>
+            <td>Traveller personalisation, NDC 21.3 (2021)</td>
+          </tr>
+          <tr>
+            <td>OpenTravel Alliance</td>
+            <td>Supplier schemas, early 2000s</td>
+            <td>Traveller profile, years later</td>
+          </tr>
+          <tr>
+            <td>Activity Travel Protocol</td>
+            <td>Operator and supplier identity, 2025&ndash;26</td>
+            <td>Traveller Layer, Party Registry v0.3 (2026)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The Activity Travel Protocol Party Registry v0.3 adds the Traveller Layer. The traveller becomes a Party.</p>
+
+    <h2>What it means to be a Party</h2>
+
+    <p>In the Activity Travel Protocol, being a Party means three things: you have an authenticated identity, you can participate in protocol operations with that identity, and your participation is recorded in an immutable event log.</p>
+
+    <p>Until now, all three of those were true of operators, suppliers, travel agencies, and AI agents. From Party Registry v0.3, they are true of travellers too.</p>
+
+    <div class="pull-quote">
+      <p>&ldquo;The traveller has never formally authorised anything. The AI agent that coordinates their journey holds a mandate from the <em>operator</em>, not from the guest. That is correct for Phase 1. It is not acceptable at scale.&rdquo;</p>
+    </div>
+
+    <p>The Traveller Layer is not a consumer app feature. It is a protocol change. Every subsequent implementation &mdash; every mobile app, every cross-operator journey interface, every AI agent that a traveller instructs &mdash; is built on what is specified here.</p>
+
+    <h2>What Party Registry v0.3 defines</h2>
+
+    <ul class="feature-list">
+      <li>
+        <span class="feature-name">TRAVELLER<br>party type</span>
+        <span class="feature-desc">A simplified Party Record designed for individuals, not organisations. No company registration, no mTLS certificate required. The authentication anchor is a verified email address or phone number. Identity is progressively enriched over time &mdash; a traveller starts with a phone number and can add a passport number when a booking requires it.</span>
+      </li>
+      <li>
+        <span class="feature-name">Consumer<br>authentication</span>
+        <span class="feature-desc">Four flows, covering what travellers already have: social OIDC (Sign in with Google, Apple, LINE), email magic link, phone OTP, and passkey. Operators choose which to support; the protocol defines the standard for each. No new credentials to manage.</span>
+      </li>
+      <li>
+        <span class="feature-name">Traveller Identity<br>Token</span>
+        <span class="feature-desc">A signed, portable credential that lets a traveller&rsquo;s identity created at one ATP operator be recognised by another &mdash; without centralising personal data anywhere. The token contains a verified contact hash, not the contact itself. Cross-operator discovery without a central registry.</span>
+      </li>
+      <li>
+        <span class="feature-name">Traveller-issued<br>AI Agent mandates</span>
+        <span class="feature-desc">A traveller can formally authorise an AI agent to act on their behalf &mdash; with a cryptographically scoped mandate, capped at authority Level 2, revocable at any time. The agent&rsquo;s authority is bound to the traveller&rsquo;s Booking Objects. The traveller is now the principal, not a beneficiary.</span>
+      </li>
+      <li>
+        <span class="feature-name">Consent records</span>
+        <span class="feature-desc">Protocol-level consent grants for data processing, AI agent authorisation, and cross-operator sharing. Timestamped, revocable, and attached to the TRAVELLER Party Record. The mechanism that makes APPI, GDPR, and PDPA compliance assertable at scale &mdash; not just operationally workable for a single operator.</span>
+      </li>
+    </ul>
+
+    <h2>What it unlocks</h2>
+
+    <p>The Traveller Layer is a specification change. But what it makes possible is a different kind of product.</p>
+
+    <div class="scenario">
+      <div class="scenario-label">Scenario &mdash; Azusa Journey, Phase 2</div>
+      <p>A guest books MyAuberge through the ATP mobile app. They sign in with LINE &mdash; thirty seconds, no new account. The app creates their <em>TRAVELLER Party Record</em> and issues them a Traveller Identity Token.</p>
+      <p>They authorise the <em>Journey Coordinator Agent</em> &mdash; not with a checkbox, but with a formal mandate. The agent is permitted to send notifications, monitor their train, coordinate with the farm, and escalate to a human if something goes wrong. The traveller can revoke this authorisation from the app at any time.</p>
+      <p>Six months later, the same traveller books a flight with JAL. JAL issues them a JAL Traveller Identity Token. When they add a MyAuberge stay to their trip, they present their JAL token to the MyAuberge app. Their identity is recognised. Their booking is linked. <em>One journey interface</em> across two operators. No re-registration. No shared personal data.</p>
+      <p>When TU-4 fires &mdash; when the agent cannot reach them during transit &mdash; the emergency contact in their TRAVELLER Party Record is notified. Not the emergency contact the operator <strong>assumed</strong> was in a field somewhere. The one the traveller <strong>registered</strong> as theirs.</p>
+    </div>
+
+    <p>The Traveller Layer also completes something that has been implicit in the protocol since Arc 1: the full duty-of-care chain. Every phase of the Booking Object state machine has an assigned duty-of-care holder &mdash; operator, supplier, or guest-directed. When a TRAVELLER Party Record exists, the TU-1 through TU-6 escalation chain is no longer outbound-only. The traveller can respond through an authenticated channel. The emergency contact notification in TU-4 goes to a person the traveller chose, not one the operator captured in a booking form.</p>
+
+    <h2>The trust question agentic travel keeps asking</h2>
+
+    <p>The dominant question in the travel industry&rsquo;s current conversation about AI agents is not &ldquo;can the agent book?&rdquo; It is &ldquo;who authorised the agent?&rdquo; Every editorial piece, every operator concern, every regulator&rsquo;s inquiry circles back to this.</p>
+
+    <p>The current answer &mdash; from most agentic travel products &mdash; is that the operator authorised the agent. The operator holds the booking relationship. The operator&rsquo;s system issues the agent its authority. The traveller benefits from this, but they are not, in any formal sense, the principal.</p>
+
+    <p>The Activity Travel Protocol&rsquo;s answer, from Party Registry v0.3, is different. The traveller can be the principal. They can issue a mandate. They can set the scope. They can revoke it. And every action the agent takes under that mandate is recorded in an event log that is admissible as evidence of what was and was not authorised.</p>
+
+    <div class="pull-quote">
+      <p>&ldquo;An AI agent that the traveller explicitly authorised, with a revocable mandate, a consent record, and an immutable audit trail &mdash; that is not a product feature. That is the answer to the regulatory question that agentic travel has been unable to answer.&rdquo;</p>
+    </div>
+
+    <p>The EU AI Act requires transparency about automated decision-making. Japan&rsquo;s Cabinet Office AI guidelines require human oversight mechanisms. Singapore&rsquo;s IMDA Agentic AI Framework requires accountability at every delegation step. The TRAVELLER Party Record, the traveller-issued mandate, and the consent records in Party Registry v0.3 are the mechanism that makes all three assertable &mdash; not by adding compliance overhead, but because the protocol was built this way from the start.</p>
+
+    <hr class="divider">
+
+    <h2>A working draft, an open process</h2>
+
+    <p>Party Registry v0.3 is publishing today as a working draft at <a href="https://activitytravel.pro/working-drafts/" style="color: var(--accent-mid); text-decoration: underline; text-underline-offset: 3px;">activitytravel.pro/working-drafts/</a>. The specification is complete enough to build against. The reference implementation &mdash; the Azusa Journey at MyAuberge K.K. in Chino, Nagano &mdash; will implement Phase 2 of the Traveller Layer this year.</p>
+
+    <p>Four questions are still open and will be resolved in the next working session: the structure of the emergency contact record relative to data minimisation requirements; the model for minor traveller proxy (parent or guardian acting on behalf of a child); traveller-facing MCP tool exposure; and verified travel documents in the TRAVELLER Party Record.</p>
+
+    <p>If you are building against the Activity Travel Protocol, or thinking about it, the working draft is the right starting point. If you want to participate in the open questions, open an issue at the <a href="https://github.com/activity-travel-protocol/protocol-spec" style="color: var(--accent-mid); text-decoration: underline; text-underline-offset: 3px;">activity-travel-protocol/protocol-spec</a> repository.</p>
+
+    <div class="callout">
+      <div class="callout-label">The Arcs</div>
+      <p>
+        Arc 1 &mdash; Identity &amp; Trust &nbsp;&middot;&nbsp;
+        Arc 2 &mdash; Discovery &amp; Capability &nbsp;&middot;&nbsp;
+        Arc 3 &mdash; Workflow &amp; Disruption &nbsp;&middot;&nbsp;
+        Arc 4 &mdash; Schema &amp; SDK &nbsp;&middot;&nbsp;
+        <strong>Arc 5 &mdash; The Traveller Layer</strong>
+      </p>
+    </div>
+
+    <div class="footer-callout">
+      <p>The Activity Travel Protocol is an open standard for the global travel industry, governed by the Activity Travel Protocol Foundation (一般社団法人アクティビティトラベルプロトコールファウンデーション) under Apache 2.0.</p>
+      <p>
+        Specification: <a href="https://activitytravel.pro">activitytravel.pro</a>
+        &nbsp;&middot;&nbsp;
+        Working drafts: <a href="https://activitytravel.pro/working-drafts/">activitytravel.pro/working-drafts/</a>
+        &nbsp;&middot;&nbsp;
+        GitHub: <a href="https://github.com/activity-travel-protocol">activity-travel-protocol</a>
+      </p>
+    </div>
+
+  </div>
+</article>
+
+<div class="post-footer">
+  <span>&larr; <a href="https://activitytravel.org/blog">All posts</a></span>
+  <span>Activity Travel Protocol Foundation &middot; April 2026</span>
+</div>
+
+</body>
+</html>
