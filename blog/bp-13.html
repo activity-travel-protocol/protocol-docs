@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Security Kernel: how the protocol enforces trust — Activity Travel Protocol</title>
-  <meta name="description" content="Every consequential action passes through a single non-bypassable enforcement component. ODRL policy evaluation, mandate verification, and the CONFIRMATION hard cap — in sequence, every time." />
+  <title>The Security Kernel: how the protocol enforces trust &mdash; Activity Travel Protocol</title>
+  <meta name="description" content="Every consequential action passes through a single non-bypassable enforcement component. Cedar policy evaluation, mandate verification, and the CONFIRMATION hard cap &#x2014; in sequence, every time." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -124,56 +124,56 @@
 
   <div class="breadcrumb">
     <a href="https://activitytravel.org/blog/">Blog</a>
-    <span>›</span>
-    <span>Arc 4 — Technical Foundations</span>
+    <span>&rsaquo;</span>
+    <span>Arc 4 &mdash; Technical Foundations</span>
   </div>
 
   <article>
-    <span class="post-arc">Arc 4 — Technical Foundations</span>
+    <span class="post-arc">Arc 4 &mdash; Technical Foundations</span>
     <h1>The Security Kernel: how the protocol enforces trust</h1>
     <div class="post-meta">
       <span class="post-date">8 April 2026</span>
-      <span class="post-audience-tag">Developers · Platform operators · Technically curious business readers</span>
+      <span class="post-audience-tag">Developers ﾂｷ Platform operators ﾂｷ Technically curious business readers</span>
     </div>
     <div class="author-block">
       <div class="author-avatar">TS</div>
       <div>
         <div class="author-name">Tom Sato</div>
         <div class="author-title">Founding Maintainer, Activity Travel Protocol</div>
-        <a class="author-contact" href="https://activitytravel.org/#contact">Contact →</a>
+        <a class="author-contact" href="https://activitytravel.org/#contact">Contact 竊・/a>
       </div>
     </div>
     <div class="prose">
 <hr />
-<p>Most software systems enforce access control through a mix of authentication checks, database permissions, and application-layer guards. Each guard is implemented by a developer, configured by an administrator, and maintained over time as the system evolves. When a guard is missed — when a developer forgets a permission check, or a configuration is misconfigured, or a maintenance change inadvertently removes a guard — there is no automatic backstop.</p>
-<p>The Activity Travel Protocol takes a different approach. Every consequential action in the protocol — every state transition, every data write, every commitment made on behalf of a traveller — passes through a single enforcement component: the Security Kernel. It is non-bypassable by design, and it runs before any application logic reaches the Booking Object.</p>
+<p>Most software systems enforce access control through a mix of authentication checks, database permissions, and application-layer guards. Each guard is implemented by a developer, configured by an administrator, and maintained over time as the system evolves. When a guard is missed &mdash; when a developer forgets a permission check, or a configuration is misconfigured, or a maintenance change inadvertently removes a guard &mdash; there is no automatic backstop.</p>
+<p>The Activity Travel Protocol takes a different approach. Every consequential action in the protocol &mdash; every state transition, every data write, every commitment made on behalf of a traveller &mdash; passes through a single enforcement component: the Security Kernel. It is non-bypassable by design, and it runs before any application logic reaches the Booking Object.</p>
 <hr />
 <p>A complex travel booking involves parties that do not know each other, operating under different regulatory frameworks, with different commercial interests, in potentially different countries. When an AI agent acts on behalf of a traveller in this environment, who ensures that it is doing only what it is authorised to do?</p>
-<p>The answer in most current systems is: nobody, systematically. An API key grants access to a system. What the holder of that API key can do within the system is determined by the application logic — which may or may not have been written with the full range of possible inputs in mind.</p>
+<p>The answer in most current systems is: nobody, systematically. An API key grants access to a system. What the holder of that API key can do within the system is determined by the application logic &mdash; which may or may not have been written with the full range of possible inputs in mind.</p>
 <p>For travel, the stakes are concrete. An AI agent that can make booking state transitions without authorisation can cancel a confirmed booking, reroute a traveller, or commit commercial terms that the operator never agreed to. A supplier system with incorrect API permissions can write to another supplier's booking data. A sub-agent that has accumulated more permissions than its mandate allows can take actions that its principal cannot audit.</p>
 <p>Application-layer access control is the norm because it is convenient: permission checks are written in the same language as the application, maintained in the same codebase, and tested with the same tools.</p>
-<p>The problem is that convenience and correctness are in tension. Application-layer guards are optional — a developer can forget them. They are distributed — the same permission rule may need to be enforced in multiple places in the codebase, and a miss in one place is a vulnerability. They are static — they are checked at development time and may not reflect the current policy when the application is running.</p>
+<p>The problem is that convenience and correctness are in tension. Application-layer guards are optional &mdash; a developer can forget them. They are distributed &mdash; the same permission rule may need to be enforced in multiple places in the codebase, and a miss in one place is a vulnerability. They are static &mdash; they are checked at development time and may not reflect the current policy when the application is running.</p>
 <p>For a multi-party protocol where the parties involved in a booking are not all known at development time, and where an AI agent's permitted actions change as the Booking Object moves through its state machine, application-layer access control is architecturally insufficient.</p>
 <p>The Security Kernel is the Activity Travel Protocol's non-bypassable policy enforcement component. It sits between every request and every Booking Object state transition. No application logic, no AI agent, and no API call can reach a Booking Object state transition without first passing through the Security Kernel.</p>
 <p>It has three enforcement functions.</p>
-<p><strong>Policy evaluation.</strong> The Security Kernel evaluates ODRL (Open Digital Rights Language) policies against every proposed state transition. The ODRL policy for a Booking Object defines what transitions are permitted, under what conditions, and by whom. The Security Kernel uses OPA (Open Policy Agent) as its evaluation engine. If the proposed transition does not satisfy the policy, it is rejected with a 403 error before any database write occurs.</p>
-<p><strong>Mandate verification.</strong> Every action taken by an AI agent carries an ATP Mandate JWT — a cryptographically signed token that declares the agent's identity and permitted authority scope. The Security Kernel verifies the signature (Ed25519/EdDSA) and evaluates the Cedar policy set embedded in the mandate against the proposed action. Cedar is an open-source policy language developed by AWS for fine-grained, machine-analyzable authorization — it expresses rules like "this agent may invoke this specific tool, on this specific booking, only when the booking is in this state." An agent whose mandate does not include the action it is attempting is rejected. An agent whose mandate is bound to Booking Object A cannot act on Booking Object B. These are hard rejections, not warnings.</p>
-<p><strong>Human ceiling enforcement.</strong> The CONFIRMATION hard cap is a Security Kernel enforcement rule, not an application convention. No AI agent — regardless of its declared authority level — can complete a booking confirmation without a human approval step. This is the protocol's answer to the question of autonomous AI commitment: at the point of maximum commercial consequence, a human must be in the loop. The Security Kernel enforces this unconditionally.</p>
-<p>The Security Kernel is stateless with respect to the application. It evaluates each proposed action independently, against the current policy and the current Booking Object state. A policy change takes effect immediately — there is no cache to invalidate, no application restart required, no code deployment needed.</p>
+<p><strong>Policy evaluation.</strong> The Security Kernel evaluates Cedar policies against every proposed state transition. The Cedar policy set for a Booking Object defines what transitions are permitted, under what conditions, and by whom &#x2014; expressed as <code>permit</code> and <code>forbid</code> rules version-controlled alongside the protocol specification. The Security Kernel runs Cedarling WASM in-process as its evaluation engine, with no network hop and sub-millisecond evaluation time. If the proposed transition does not satisfy the policy, it is rejected with a 403 error before any database write occurs.</p>
+<p><strong>Mandate verification.</strong> Every action taken by an AI agent carries an ATP Mandate JWT &mdash; a cryptographically signed token that declares the agent's identity and permitted authority scope. The Security Kernel verifies the signature (Ed25519/EdDSA) and evaluates the Cedar policy set embedded in the mandate against the proposed action. Cedar is an open-source policy language developed by AWS for fine-grained, machine-analyzable authorization &mdash; it expresses rules like "this agent may invoke this specific tool, on this specific booking, only when the booking is in this state." An agent whose mandate does not include the action it is attempting is rejected. An agent whose mandate is bound to Booking Object A cannot act on Booking Object B. These are hard rejections, not warnings.</p>
+<p><strong>Human ceiling enforcement.</strong> The CONFIRMATION hard cap is a Security Kernel enforcement rule, not an application convention. No AI agent &mdash; regardless of its declared authority level &mdash; can complete a booking confirmation without a human approval step. This is the protocol's answer to the question of autonomous AI commitment: at the point of maximum commercial consequence, a human must be in the loop. The Security Kernel enforces this unconditionally.</p>
+<p>The Security Kernel is stateless with respect to the application. It evaluates each proposed action independently, against the current policy and the current Booking Object state. A policy change takes effect immediately &mdash; there is no cache to invalidate, no application restart required, no code deployment needed.</p>
 <p>For any action taken by an AI agent via the MCP Server, the enforcement sequence is:</p>
-<p>1. <strong>Windley Loop</strong> (before planning): the agent queries its own mandate to understand what it is permitted to do before planning any tool calls. This turns policy from a gate into a map — the agent reads the terrain before it walks into it, rather than discovering walls when it hits them. See the next post in this series for a full explanation.</p>
+<p>1. <strong>Windley Loop</strong> (before planning): the agent queries its own mandate to understand what it is permitted to do before planning any tool calls. This turns policy from a gate into a map &mdash; the agent reads the terrain before it walks into it, rather than discovering walls when it hits them. See the next post in this series for a full explanation.</p>
 <p>2. <strong>NeMo Guardrails</strong> (at inference time, Tier 2/3): Rail 3 intercepts tool calls that fall outside the agent's declared scope before the MCP call is formed. Belt-and-suspenders after the Windley Loop.</p>
 <p>3. <strong>Mandate Evaluation</strong> (on tool call): the MCP Server verifies the ATP Mandate JWT and evaluates the Cedar policy set against the specific action. Rejection: 403.</p>
-<p>4. <strong>Security Kernel</strong> (on state transition): OPA evaluates the ODRL policy. Human ceiling check. Booking Object binding check. Rejection: 403.</p>
+<p>4. <strong>Security Kernel</strong> (on state transition): Cedarling WASM evaluates the Cedar policy. Human ceiling check. Booking Object binding check. Rejection: 403.</p>
 <p>5. <strong>Execution</strong>: the tool executes and the result is returned.</p>
-<p>Each layer is independent. A gap in any one layer does not expose the Booking Object — the next layer catches it. In practice, under normal operation with a correctly configured Windley Loop, layers 2 through 4 should see no violations. They exist for the cases when they are needed.</p>
-<p>For a regulator, the Security Kernel means that every consequential action in a protocol-compliant booking has been evaluated against a stated policy before it was allowed. The audit trail is the event log. The policy is the ODRL document. The evaluation record is available for inspection.</p>
+<p>Each layer is independent. A gap in any one layer does not expose the Booking Object &mdash; the next layer catches it. In practice, under normal operation with a correctly configured Windley Loop, layers 2 through 4 should see no violations. They exist for the cases when they are needed.</p>
+<p>For a regulator, the Security Kernel means that every consequential action in a protocol-compliant booking has been evaluated against a stated policy before it was allowed. The audit trail is the event log. The policy is the Cedar policy set. The evaluation record is available for inspection.</p>
 <p>For an operator, it means that the AI agents they deploy cannot exceed their declared authority scope, regardless of what instructions they receive. An AI agent cannot be prompted into taking an action that the Security Kernel would reject.</p>
-<p>For a traveller, it means that the entity acting on their behalf — whether a human travel agent or an AI agent — is operating within a governed framework that has been verified at every consequential step of their booking.</p>
+<p>For a traveller, it means that the entity acting on their behalf &mdash; whether a human travel agent or an AI agent &mdash; is operating within a governed framework that has been verified at every consequential step of their booking.</p>
 <p>The Security Kernel is the component that makes it technically accurate to say: no unverified, unauthorised action can change the state of a protocol-compliant booking.</p>
     </div>
     <div class="spec-links">
-      <p><em>Read more in the spec: <a href="https://activitytravel.pro/layer1/">activitytravel.pro/layer1/</a> — Security Kernel, trust chain, mandate model</em></p>
+      <p><em>Read more in the spec: <a href="https://activitytravel.pro/layer1/">activitytravel.pro/layer1/</a> &mdash; Security Kernel, trust chain, mandate model</em></p>
     </div>
     <div class="post-nav">
       <div class="post-nav-item">
@@ -182,14 +182,14 @@
       </div>
       <div class="post-nav-item" style="text-align:right">
         <div class="post-nav-label">Next</div>
-        <a class="post-nav-title" href="./bp-14.html">AI agents in the Activity Travel Protocol — how they work</a>
+        <a class="post-nav-title" href="./bp-14.html">AI agents in the Activity Travel Protocol &mdash; how they work</a>
       </div>
     </div>
   </article>
 
   <footer>
     <div class="footer-left">
-      Apache 2.0 &nbsp;·&nbsp; <a href="https://activitytravel.org/governance">Activity Travel Protocol Foundation (in formation)</a> &nbsp;·&nbsp; <a href="https://activitytravel.pro">activitytravel.pro</a>
+      Apache 2.0 &nbsp;ﾂｷ&nbsp; <a href="https://activitytravel.org/governance">Activity Travel Protocol Foundation (in formation)</a> &nbsp;ﾂｷ&nbsp; <a href="https://activitytravel.pro">activitytravel.pro</a>
     </div>
     <div class="footer-right">
       <a href="https://activitytravel.org/#subscribe">Subscribe</a>
